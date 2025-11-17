@@ -1,0 +1,297 @@
+/* assets/css/style.css */
+
+/* Global Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+footer {
+    margin-top: auto;
+}
+
+/* Navbar Customization */
+.navbar-brand {
+    font-size: 1.5rem;
+    letter-spacing: 0.5px;
+}
+
+.nav-link {
+    font-weight: 500;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem !important;
+}
+
+.nav-link:hover {
+    transform: translateY(-2px);
+}
+
+.nav-link.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+}
+
+/* Card Styles */
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+.card-img-top {
+    border-radius: 15px 15px 0 0;
+    height: 200px;
+    object-fit: cover;
+}
+
+/* Button Styles */
+.btn {
+    border-radius: 8px;
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+    color: white;
+    padding: 80px 0;
+    border-radius: 0 0 50px 50px;
+}
+
+.hero-section h1 {
+    font-weight: 700;
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+}
+
+.hero-section p {
+    font-size: 1.2rem;
+    opacity: 0.95;
+}
+
+/* Stats Section */
+.stats-card {
+    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+    border-left: 4px solid #198754;
+    padding: 1.5rem;
+    border-radius: 10px;
+}
+
+.stats-card .icon {
+    font-size: 3rem;
+    color: #198754;
+}
+
+.stats-card h3 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #198754;
+}
+
+/* Eskul Card */
+.eskul-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.eskul-card .badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1;
+}
+
+.eskul-card .card-body {
+    padding: 1.5rem;
+}
+
+.eskul-card .pembina {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+/* News/Berita Card */
+.news-card {
+    height: 100%;
+}
+
+.news-card .card-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.news-meta {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+/* Form Styles */
+.form-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    padding: 0.6rem 1rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #198754;
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+}
+
+/* Table Styles */
+.table {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table thead {
+    background-color: #198754;
+    color: white;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.pc-sidebar .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    padding: 18px 20px 6px 20px; /* Tambahkan jarak atas */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.9;
+}
+
+
+.badge {
+    padding: 0.4rem 0.8rem;
+    font-weight: 500;
+}
+
+/* Loading Animation */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Sertifikat Template */
+.sertifikat-template {
+    background: white;
+    border: 15px solid #198754;
+    padding: 3rem;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+}
+
+.sertifikat-template::before,
+.sertifikat-template::after {
+    content: '';
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    border: 3px solid #ffc107;
+}
+
+.sertifikat-template::before {
+    top: 20px;
+    left: 20px;
+    border-right: none;
+    border-bottom: none;
+}
+
+.sertifikat-template::after {
+    bottom: 20px;
+    right: 20px;
+    border-left: none;
+    border-top: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero-section h1 {
+        font-size: 2rem;
+    }
+    
+    .hero-section p {
+        font-size: 1rem;
+    }
+    
+    .stats-card h3 {
+        font-size: 2rem;
+    }
+    
+    .sidebar {
+        min-height: auto;
+    }
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Print Styles */
+@media print {
+    .navbar, footer, .btn, .no-print {
+        display: none !important;
+    }
+    
+    body {
+        background: white;
+    }
+    
+    .sertifikat-template {
+        border: 15px solid #198754;
+        page-break-after: always;
+    }
+}
