@@ -1,7 +1,9 @@
 <?php
 // admin/galeri/index.php
 require_once '../../config/database.php';
-requireRole(['admin', 'pembina']);
+require_once __DIR__ . '/../../config/middleware.php';
+only('admin');
+requireRole(['admin']);
 
 $page_title = 'Kelola Galeri';
 $current_user = getCurrentUser();
@@ -12,7 +14,7 @@ if (isset($_GET['delete'])) {
     if ($galeri['gambar']) {
         deleteFile($galeri['gambar']);
     }
-    execute("DELETE FROM galeris WHERE id = ?", [$_GET['delete']], 'i');
+    query("DELETE FROM galeris WHERE id = ?", [$_GET['delete']], 'i');
     setFlash('success', 'Foto berhasil dihapus!');
     redirect('admin/galeri/index.php');
 }
@@ -20,7 +22,7 @@ if (isset($_GET['delete'])) {
 // Toggle status
 if (isset($_GET['toggle']) && isset($_GET['status'])) {
     $status = $_GET['status'] == '1' ? 0 : 1;
-    execute("UPDATE galeris SET is_active = ? WHERE id = ?", [$status, $_GET['toggle']], 'ii');
+    query("UPDATE galeris SET is_active = ? WHERE id = ?", [$status, $_GET['toggle']], 'ii');
     setFlash('success', 'Status berhasil diupdate!');
     redirect('admin/galeri/index.php');
 }
@@ -174,4 +176,44 @@ $belum_dinilai = query("SELECT COUNT(*) as total FROM anggota_ekskul WHERE statu
         <?php endif; ?>
     </div>
 </div>
+<!-- Modal konfirmasi dihapus (Pengganti alert/confirm) -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmDeleteModalLabel">Konfirmasi Hapus</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Apakah Anda yakin ingin menghapus Galeri ini? Aksi ini tidak dapat dibatalkan.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <a id="deleteButton" href="#" class="btn btn-danger">Hapus</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    // Menambahkan fungsi modal untuk konfirmasi hapus (menggantikan window.confirm)
+    document.addEventListener('DOMContentLoaded', function() {
+        var deleteLinks = document.querySelectorAll('a[href*="?delete="]');
+        deleteLinks.forEach(function(link) {
+            link.removeAttribute('onclick'); // Hapus onclick lama
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                var deleteUrl = this.getAttribute('href');
+                
+                // Set URL di tombol Hapus Modal
+                var deleteButton = document.getElementById('deleteButton');
+                deleteButton.setAttribute('href', deleteUrl);
+                
+                // Tampilkan Modal
+                var confirmModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+                confirmModal.show();
+            });
+        });
+    });
+</script>
 <?php include __DIR__ . '/../../includes/berry_shell_close.php'; ?>

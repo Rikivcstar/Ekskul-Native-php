@@ -1,0 +1,26 @@
+/* --- FIX SIDEBAR DESKTOP --- */
+.pc-sidebar {
+    transform: translateX(0);
+    visibility: visible;
+    opacity: 1;
+}
+
+/* --- FIX MOBILE SIDEBAR --- */
+.pc-sidebar.mob-sidebar-active {
+    left: 0 !important;
+    transform: translateX(0) !important;
+}
+
+/* overlay mobile */
+.pc-sidebar-overlay {
+    display: none;
+}
+.pc-sidebar.mob-sidebar-active + #pc-sidebar-overlay {
+    display: block !important;
+}
+
+/* tombol toggle */
+#sidebar-hide, #sidebar-close {
+    cursor: pointer;
+    margin-left: 10px !important;
+}

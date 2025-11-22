@@ -1,7 +1,9 @@
 <?php
 // admin/penilaian_siswa.php (untuk admin & pembina)
 require_once '../config/database.php';
-requireRole(['admin', 'pembina']);
+require_once __DIR__ . '/../config/middleware.php';
+only('admin');
+requireRole(['admin']);
 
 $page_title = 'Penilaian Siswa';
 $current_user = getCurrentUser();
@@ -17,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_nilai'])) {
     if (!in_array($nilai, ['A', 'B', 'C'])) {
         setFlash('danger', 'Nilai tidak valid!');
     } else {
-        $result = execute(
+        $result = query(
             "UPDATE anggota_ekskul SET nilai = ?, tanggal_penilaian = ?, catatan_pembina = ? WHERE id = ?",
             [$nilai, $tanggal_penilaian, $catatan, $anggota_id],
             'sssi'

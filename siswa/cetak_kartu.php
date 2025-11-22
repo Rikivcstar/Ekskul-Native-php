@@ -1,6 +1,8 @@
 <?php
 // siswa/cetak_kartu.php
 require_once '../config/database.php';
+require_once '../config/middleware.php';
+only('siswa');
 requireRole(['siswa']);
 
 $current_user = getCurrentUser();
@@ -41,13 +43,16 @@ $foto_url = BASE_URL . 'assets/img/default-avatar.png';
 if ($data['foto'] && file_exists('../' . $data['foto'])) {
     $foto_url = BASE_URL . $data['foto'];
 }
+
+// Logo sekolah - sesuaikan path dengan lokasi file logo Anda
+$logo_url = BASE_URL . 'assets/images/logo MTSN1.png';
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kartu Anggota - <?php echo $data['nama_ekskul']; ?></title>
+    <title>Kartu Anggota - <?php echo htmlspecialchars($data['nama_ekskul']); ?></title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -110,8 +115,7 @@ if ($data['foto'] && file_exists('../' . $data['foto'])) {
             height: 53.98mm;
             position: relative;
             box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-            border-radius: 8px;
-            overflow: hidden;
+            overflow: hidden;       
         }
         
         /* KARTU DEPAN */
@@ -122,30 +126,49 @@ if ($data['foto'] && file_exists('../' . $data['foto'])) {
         
         .header {
             background: rgba(0,0,0,0.2);
-            padding: 8px;
+            padding: 6px 8px;
             text-align: center;
             color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .logo-container {
+            width: 35px;
+            height: 35px;
+            flex-shrink: 0;
+        }
+        
+        .logo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .header-text {
+            flex: 1;
         }
         
         .header h1 {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 700;
-            margin-bottom: 2px;
+            margin-right: 30px;
             letter-spacing: 0.5px;
         }
         
         .header p {
-            font-size: 8px;
-            margin: 0;
-            letter-spacing: 1px;
+            font-size: 7px;
+            margin-right: 30px;
+            letter-spacing: 0.8px;
         }
         
         .content-area {
             background: white;
             margin: 5px;
             padding: 8px;
-            height: 142px;
-            border-radius: 6px;
+            height: 145px;
             display: flex;
             gap: 8px;
         }
@@ -184,15 +207,16 @@ if ($data['foto'] && file_exists('../' . $data['foto'])) {
         }
         
         .eskul-name {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 700;
             color: #198754;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
             border-bottom: 2px solid #198754;
-            padding-bottom: 3px;
+            padding-bottom: 2px;
             word-wrap: break-word;
             text-transform: uppercase;
             letter-spacing: 0.3px;
+            line-height: 1.2;
         }
         
         .info-row {
@@ -250,13 +274,12 @@ if ($data['foto'] && file_exists('../' . $data['foto'])) {
         
         .footer-strip {
             position: absolute;
-            bottom: 0;
+            bottom: 10px;
             left: 0;
             right: 0;
-            background: rgba(0,0,0,0.3);
             padding: 3px;
             text-align: center;
-            color: white;
+            color: black;
             font-size: 6px;
         }
         
@@ -306,10 +329,10 @@ if ($data['foto'] && file_exists('../' . $data['foto'])) {
         .contact-box {
             background: #198754;
             color: white;
-            padding: 5px;
+            padding: 15px;
             border-radius: 4px;
             text-align: center;
-            margin-top: 6px;
+            margin-top: 1rem;
         }
         
         .contact-box h3 {
@@ -326,9 +349,15 @@ if ($data['foto'] && file_exists('../' . $data['foto'])) {
         
         /* PRINT STYLES */
         @media print {
+            @page {
+                size: 85.6mm 53.98mm;
+                margin: 0;
+            }
+            
             body {
                 background: white;
                 padding: 0;
+                margin: 0;
             }
             
             .no-print {
@@ -339,6 +368,7 @@ if ($data['foto'] && file_exists('../' . $data['foto'])) {
                 gap: 0;
                 margin: 0;
                 padding: 0;
+                display: block;
             }
             
             .card {
@@ -346,15 +376,19 @@ if ($data['foto'] && file_exists('../' . $data['foto'])) {
                 page-break-inside: avoid;
                 page-break-after: always;
                 margin: 0;
+                width: 85.6mm;
+                height: 53.98mm;
             }
             
             .card-back {
                 page-break-before: always;
             }
             
-            @page {
-                size: 85.6mm 53.98mm;
-                margin: 0;
+            /* Pastikan semua elemen tercetak */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
             }
         }
     </style>
@@ -371,7 +405,7 @@ if ($data['foto'] && file_exists('../' . $data['foto'])) {
             ← Kembali ke Profil
         </a>
         <p style="margin-top: 15px; color: #6c757d; font-size: 14px;">
-            💡 Tips: Gunakan printer dengan ukuran kertas custom (85.6mm x 53.98mm) atau cetak di kertas A4 lalu potong
+            💡 Tips: Gunakan printer dengan ukuran kertas custom (85.6mm x 53.98mm) atau cetak di kertas A4 lalu potong sesuai ukuran kartu
         </p>
     </div>
     
@@ -379,14 +413,19 @@ if ($data['foto'] && file_exists('../' . $data['foto'])) {
         <!-- KARTU DEPAN -->
         <div class="card card-front">
             <div class="header">
-                <h1>MTsN 1 LEBAK</h1>
-                <p>KARTU ANGGOTA EKSTRAKURIKULER</p>
+                <div class="logo-container">
+                    <img src="<?php echo $logo_url; ?>" alt="Logo MTsN 1 Lebak">
+                </div>
+                <div class="header-text">
+                    <h1>MTsN 1 LEBAK</h1>
+                    <p>KARTU ANGGOTA EKSTRAKURIKULER</p>
+                </div>
             </div>
             
             <div class="content-area">
                 <div class="photo-section">
                     <?php if ($data['foto'] && file_exists('../' . $data['foto'])): ?>
-                        <img src="<?php echo $foto_url; ?>" alt="Foto <?php echo $data['name']; ?>">
+                        <img src="<?php echo $foto_url; ?>" alt="Foto <?php echo htmlspecialchars($data['name']); ?>">
                     <?php else: ?>
                         <div class="photo-placeholder">
                             <?php echo strtoupper(substr($data['name'], 0, 1)); ?>
@@ -472,12 +511,5 @@ if ($data['foto'] && file_exists('../' . $data['foto'])) {
             </div>
         </div>
     </div>
-    
-    <script>
-        // Auto print dialog ketika halaman dibuka (opsional)
-        // window.onload = function() {
-        //     window.print();
-        // }
-    </script>
 </body>
 </html>

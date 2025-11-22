@@ -1,7 +1,9 @@
 <?php
 // admin/eskul/detail.php
 require_once '../../config/database.php';
-requireRole(['admin', 'pembina']);
+require_once __DIR__ . '/../../config/middleware.php';
+only('admin');
+requireRole(['admin']);
 
 $page_title = 'Detail Ekstrakurikuler';
 $current_user = getCurrentUser();

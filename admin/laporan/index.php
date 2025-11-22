@@ -1,7 +1,9 @@
 <?php
 // admin/laporan/index.php
 require_once '../../config/database.php';
-requireRole(['admin', 'pembina']);
+require_once __DIR__ . '/../../config/middleware.php';
+only('admin');
+requireRole(['admin']);
 
 $page_title = 'Laporan';
 $current_user = getCurrentUser();

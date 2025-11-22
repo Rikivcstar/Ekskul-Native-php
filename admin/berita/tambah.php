@@ -1,7 +1,9 @@
 <?php
 // admin/berita/tambah.php
 require_once '../../config/database.php';
-requireRole(['admin', 'pembina']);
+require_once __DIR__ . '/../../config/middleware.php';
+only('admin');
+requireRole(['admin']);
 
 $page_title = 'Tambah Berita';
 $current_user = getCurrentUser();
@@ -55,11 +57,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 ekstrakurikuler_id = ?, judul = ?, konten = ?, gambar = ?, 
                 tanggal_post = ?, is_published = ?
                 WHERE id = ?";
-        $result = execute($sql, [$ekstrakurikuler_id, $judul, $konten, $gambar, $tanggal_post, $is_published, $id], 'issssii');
+        $result = query($sql, [$ekstrakurikuler_id, $judul, $konten, $gambar, $tanggal_post, $is_published, $id], 'issssii');
     } else {
         $sql = "INSERT INTO berita (ekstrakurikuler_id, user_id, judul, konten, gambar, tanggal_post, is_published) 
                 VALUES (?, ?, ?, ?, ?, ?, ?)";
-        $result = execute($sql, [$ekstrakurikuler_id, $current_user['id'], $judul, $konten, $gambar, $tanggal_post, $is_published], 'iissssi');
+        $result = query($sql, [$ekstrakurikuler_id, $current_user['id'], $judul, $konten, $gambar, $tanggal_post, $is_published], 'iissssi');
     }
     
     if ($result['success']) {

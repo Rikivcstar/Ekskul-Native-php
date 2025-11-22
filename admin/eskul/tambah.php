@@ -1,6 +1,8 @@
 <?php
 // admin/eskul/tambah.php
 require_once '../../config/database.php';
+require_once __DIR__ . '/../../config/middleware.php';
+only('admin');
 requireRole(['admin']);
 
 $page_title = 'Tambah Ekstrakurikuler';
@@ -32,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $sql = "INSERT INTO ekstrakurikulers (nama_ekskul, deskripsi, pembina_id, gambar, kuota, status) 
             VALUES (?, ?, ?, ?, ?, ?)";
     
-    $result = execute($sql, [$nama_ekskul, $deskripsi, $pembina_id, $gambar, $kuota, $status], 'ssisss');
+    $result = query($sql, [$nama_ekskul, $deskripsi, $pembina_id, $gambar, $kuota, $status], 'ssisss');
     
     if ($result['success']) {
         setFlash('success', 'Ekstrakurikuler berhasil ditambahkan!');

@@ -1,7 +1,9 @@
 <?php
 // admin/laporan/export_anggota.php
 require_once '../../config/database.php';
-requireRole(['admin', 'pembina']);
+require_once __DIR__ . '/../../config/middleware.php';
+only('admin');
+requireRole(['admin']);
 
 // Query data anggota
 $data = query("

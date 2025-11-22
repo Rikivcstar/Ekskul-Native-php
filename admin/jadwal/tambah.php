@@ -1,7 +1,9 @@
 <?php
 // admin/jadwal/tambah.php
 require_once '../../config/database.php';
-requireRole(['admin', 'pembina']);
+require_once __DIR__ . '/../../config/middleware.php';
+only('admin');
+requireRole(['admin']);
 
 $page_title = 'Tambah Jadwal';
 $current_user = getCurrentUser();
@@ -44,11 +46,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 ekstrakurikuler_id = ?, hari = ?, jam_mulai = ?, jam_selesai = ?, 
                 lokasi = ?, keterangan = ?, is_active = ?
                 WHERE id = ?";
-        $result = execute($sql, [$ekstrakurikuler_id, $hari, $jam_mulai, $jam_selesai, $lokasi, $keterangan, $is_active, $id], 'isssssii');
+        $result = query($sql, [$ekstrakurikuler_id, $hari, $jam_mulai, $jam_selesai, $lokasi, $keterangan, $is_active, $id], 'isssssii');
     } else {
         $sql = "INSERT INTO jadwal_latihans (ekstrakurikuler_id, hari, jam_mulai, jam_selesai, lokasi, keterangan, is_active) 
                 VALUES (?, ?, ?, ?, ?, ?, ?)";
-        $result = execute($sql, [$ekstrakurikuler_id, $hari, $jam_mulai, $jam_selesai, $lokasi, $keterangan, $is_active], 'isssssi');
+        $result = query($sql, [$ekstrakurikuler_id, $hari, $jam_mulai, $jam_selesai, $lokasi, $keterangan, $is_active], 'isssssi');
     }
     
     if ($result['success']) {

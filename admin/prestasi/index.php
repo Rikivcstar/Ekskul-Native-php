@@ -1,7 +1,9 @@
 <?php
 // admin/prestasi/index.php
 require_once '../../config/database.php';
-requireRole(['admin', 'pembina']);
+require_once __DIR__ . '/../../config/middleware.php';
+only('admin');
+requireRole(['admin']);
 
 $page_title = 'Kelola Prestasi';
 $current_user = getCurrentUser();
@@ -12,7 +14,7 @@ if (isset($_GET['delete'])) {
     if ($prestasi['sertifikat']) {
         deleteFile($prestasi['sertifikat']);
     }
-    execute("DELETE FROM prestasis WHERE id = ?", [$_GET['delete']], 'i');
+    query("DELETE FROM prestasis WHERE id = ?", [$_GET['delete']], 'i');
     setFlash('success', 'Prestasi berhasil dihapus!');
     redirect('admin/prestasi/index.php');
 }
@@ -125,10 +127,10 @@ $belum_dinilai = query("SELECT COUNT(*) as total FROM anggota_ekskul WHERE statu
                 </div>
                 <div class="card-footer bg-white">
                     <div class="btn-group w-100">
-                        <a href="<?php echo BASE_URL; ?>admin/prestasi/tambah.php?edit=<?php echo $row['id']; ?>" class="btn btn-sm btn-warning">
+                        <a href="<?php echo BASE_URL; ?>admin/prestasi/tambah.php?edit=<?php echo $row['id']; ?>" class="btn btn-outline-warning me-2">
                             <i class="bi bi-pencil"></i> Edit
                         </a>
-                        <a href="?delete=<?php echo $row['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirmDelete()">
+                        <a href="?delete=<?php echo $row['id']; ?>" class="btn  btn-outline-danger" onclick="return confirmDelete()">
                             <i class="bi bi-trash"></i> Hapus
                         </a>
                     </div>
@@ -148,4 +150,45 @@ $belum_dinilai = query("SELECT COUNT(*) as total FROM anggota_ekskul WHERE statu
         <?php endif; ?>
     </div>
 </div>
+
+<!-- Modal konfirmasi dihapus (Pengganti alert/confirm) -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmDeleteModalLabel">Konfirmasi Hapus</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Apakah Anda yakin ingin menghapus prestasi ini? Aksi ini tidak dapat dibatalkan.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <a id="deleteButton" href="#" class="btn btn-danger">Hapus</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    // Menambahkan fungsi modal untuk konfirmasi hapus (menggantikan window.confirm)
+    document.addEventListener('DOMContentLoaded', function() {
+        var deleteLinks = document.querySelectorAll('a[href*="?delete="]');
+        deleteLinks.forEach(function(link) {
+            link.removeAttribute('onclick'); // Hapus onclick lama
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                var deleteUrl = this.getAttribute('href');
+                
+                // Set URL di tombol Hapus Modal
+                var deleteButton = document.getElementById('deleteButton');
+                deleteButton.setAttribute('href', deleteUrl);
+                
+                // Tampilkan Modal
+                var confirmModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+                confirmModal.show();
+            });
+        });
+    });
+</script>
 <?php include __DIR__ . '/../../includes/berry_shell_close.php'; ?>

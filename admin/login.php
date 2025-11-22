@@ -1,5 +1,5 @@
 <?php
-// admin/login.php - LOGIN UNTUK SISWA
+// login.php - LOGIN UNTUK SISWA
 session_start();
 require_once '../config/database.php';
 
@@ -8,11 +8,12 @@ if (isLoggedIn()) {
     if (hasRole(['admin', 'pembina'])) {
         redirect('admin/dashboard.php');
     } else {
-        redirect('siswa/dashboard.php'); // Dashboard siswa
+        redirect('siswa/dashboard.php');
     }
 }
 
 $error = '';
+$flash = getFlash();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $nis = $_POST['nis'] ?? '';
@@ -21,7 +22,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (empty($nis) || empty($password)) {
         $error = 'NIS dan password harus diisi!';
     } else {
-        // Login dengan NIS untuk siswa
         $sql = "SELECT * FROM users WHERE nis = ? AND role = 'siswa' AND is_active = 1";
         $result = query($sql, [$nis], 's');
         
@@ -51,105 +51,387 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Siswa - MTsN 1 Lebak</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #198754 0%, #20c997 100%);
-            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            background: white;
+            height: 100vh;
             display: flex;
+            flex-direction: column;
+            overflow: hidden;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
-        .login-card {
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
+
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 20%;
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            backdrop-filter: blur;
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
         }
-        .login-header {
-            background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+
+        .header-logo {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 12px;
+            padding: 8px;
+            margin-bottom: 80px;
+        }
+
+        .header-text h1 {
             color: white;
-            padding: 2rem;
-            text-align: center;
+            font-size: 18px;
+            font-weight: 700;
+            /* margin-bottom: 300px; */
         }
-        .login-body {
-            padding: 2.5rem;
+
+        .header-text p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 80px;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 640px;
+            background: white;
+            border-radius: 14px;
+            padding: 48px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            z-index: 99;
+            max-height: 90vh;
+            overflow-y: auto;
+            margin-top: 50px;
+        }
+        .login-container::-webkit-scrollbar {
+                width: 6px;
+            }
+        .login-container::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 10px;
+            }
+
+        .illustration {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .illustration img {
+            width: 290px;
+            height: auto;
+        }
+
+        .login-title {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .login-title h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .login-title p {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .alert {
+            padding: 14px 16px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-danger {
+            background: #fee;
+            color: #dc2626;
+            border-left: 4px solid #dc2626;
+        }
+
+        .alert-success {
+            background: #f0fdf4;
+            color: #16a34a;
+            border-left: 4px solid #16a34a;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 8px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 20px;
+        }
+
+        .form-input {
+            width: 100%;
+            height: 52px;
+            padding: 0 16px 0 48px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.2s ease;
+            background: #f8fafc;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
             background: white;
         }
-        .form-control:focus {
-            border-color: #198754;
-            box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+
+        .form-input::placeholder {
+            color: #94a3b8;
         }
-        .btn-login {
-            background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+
+        .password-toggle {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
             border: none;
-            padding: 0.75rem;
+            cursor: pointer;
+            color: #94a3b8;
+            font-size: 20px;
+            padding: 4px;
+        }
+
+        .password-toggle:hover {
+            color: #64748b;
+        }
+
+        .btn-login {
+            width: 100%;
+            height: 52px;
+            background: #3b82f6;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
             font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+        }
+
+        .btn-login:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .footer-links {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .footer-links p {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            display: inline-block;
+            margin: 0 8px;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        .copyright {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Icons using Unicode */
+        .icon-user::before { content: '👤'; }
+        .icon-lock::before { content: '🔒'; }
+        .icon-eye::before { content: '👁'; }
+        .icon-eye-slash::before { content: '🙈'; }
+        .icon-alert::before { content: '⚠️'; }
+        .icon-check::before { content: '✓'; }
+
+        @media (max-width: 576px) {
+            .header {
+                padding: 16px 20px;
+            }
+
+            .header-logo {
+                width: 40px;
+                height: 40px;
+            }
+
+            .header-text h1 {
+                font-size: 16px;
+            }
+
+            .header-text p {
+                font-size: 12px;
+            }
+
+            .login-container {
+                padding: 32px 24px;
+            }
+
+            .illustration img {
+                width: 180px;
+            }
+
+            .login-title h2 {
+                font-size: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-5">
-                <div class="card login-card">
-                    <div class="login-header">
-                        <i class="bi bi-person-circle" style="font-size: 3rem;"></i>
-                        <h3 class="mt-3 mb-0">Login Siswa</h3>
-                        <p class="mb-0">Sistem Ekstrakurikuler MTsN 1 Lebak</p>
-                    </div>
-                    <div class="login-body">
-                        <?php if ($error): ?>
-                        <div class="alert alert-danger alert-dismissible fade show">
-                            <i class="bi bi-exclamation-triangle-fill"></i> <?php echo $error; ?>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                        <?php endif; ?>
-                        
-                        <form method="POST" action="">
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">
-                                    <i class="bi bi-person-badge-fill"></i> NIS
-                                </label>
-                                <input type="text" name="nis" class="form-control" placeholder="Masukkan NIS Anda" required autofocus>
-                            </div>
-                            
-                            <div class="mb-4">
-                                <label class="form-label fw-semibold">
-                                    <i class="bi bi-lock-fill"></i> Password
-                                </label>
-                                <input type="password" name="password" class="form-control" placeholder="••••••••" required>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-login btn-success w-100 mb-3">
-                                <i class="bi bi-box-arrow-in-right"></i> Login
-                            </button>
-                            
-                            <div class="text-center">
-                                <a href="<?php echo BASE_URL; ?>" class="text-decoration-none me-3">
-                                    <i class="bi bi-arrow-left"></i> Kembali ke Beranda
-                                </a>
-                                <a href="<?php echo BASE_URL; ?>admin/login_admin.php" class="text-decoration-none">
-                                    <i class="bi bi-shield-lock"></i> Login Admin/Pembina
-                                </a>
-                            </div>
-                        </form>
-                        
-                        <hr class="my-4">
-                        <div class="text-center text-muted small">
-                            <p class="mb-1">Belum punya akun?</p>
-                            <a href="<?php echo BASE_URL; ?>daftar_eskul.php" class="btn btn-outline-success btn-sm">
-                                <i class="bi bi-pencil-square"></i> Daftar Ekstrakurikuler
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <div class="header">
+        <div class="header-logo">
+            <img src="<?php echo BASE_URL; ?>assets/images/logo MTSN1.png" alt="Logo" style="width: 100%; height: 100%; object-fit: contain;">
+        </div>
+        <div class="header-text">
+            <h1>MTsN 1 Lebak</h1>
+            <p>SISTEM EKSTRAKURIKULER</p>
         </div>
     </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <div class="login-container">
+        <div class="illustration">
+            <img src="<?php echo BASE_URL; ?>assets/images/logo-belajar.png" alt="Login Illustration" 
+                 onerror="this.style.display='none'">
+        </div>
+
+        <div class="login-title">
+            <h2>Aplikasi Ekstrakurikuler</h2>
+            <p>Silakan Login dengan NIS dan Password</p>
+        </div>
+
+        <?php if ($flash): ?>
+        <div class="alert alert-<?php echo $flash['type'] == 'success' ? 'success' : 'danger'; ?>">
+            <span class="icon-<?php echo $flash['type'] == 'success' ? 'check' : 'alert'; ?>"></span>
+            <?php echo htmlspecialchars($flash['message']); ?>
+        </div>
+        <?php endif; ?>
+
+        <?php if ($error): ?>
+        <div class="alert alert-danger">
+            <span class="icon-alert"></span>
+            <?php echo htmlspecialchars($error); ?>
+        </div>
+        <?php endif; ?>
+
+        <form method="POST" action="">
+            <div class="form-group">
+                <label class="form-label">NIS</label>
+                <div class="input-wrapper">
+                    <span class="input-icon icon-user"></span>
+                    <input type="text" 
+                           name="nis" 
+                           class="form-input" 
+                           placeholder="Masukkan NIS"
+                           value="<?php echo isset($_POST['nis']) ? htmlspecialchars($_POST['nis']) : ''; ?>"
+                           required 
+                           autofocus>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <div class="input-wrapper">
+                    <span class="input-icon icon-lock"></span>
+                    <input type="password" 
+                           name="password" 
+                           id="password"
+                           class="form-input" 
+                           placeholder="Masukkan Password"
+                           required>
+                    <button type="button" class="password-toggle" onclick="togglePassword()">
+                        <span id="toggleIcon" class="icon-eye"></span>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-login">Login</button>
+        </form>
+
+        <div class="footer-links">
+            <p>Belum punya akun? <a href="<?php echo BASE_URL; ?>registerasi.php">Registrasi</a></p>
+            <a href="<?php echo BASE_URL; ?>">← Kembali ke Beranda</a>
+            <span style="color: #cbd5e1;">|</span>
+            <a href="<?php echo BASE_URL; ?>admin/login_admin.php">Login Admin/Pembina</a>
+        </div>
+        <p class="copyright" style="color: black;">© 2025 MTsN 1 Lebak. Sistem Ekstrakurikuler</p>
+    </div>
+
+
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('toggleIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.className = 'icon-eye-slash';
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.className = 'icon-eye';
+            }
+        }
+    </script>
 </body>
 </html>

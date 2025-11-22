@@ -1,6 +1,8 @@
 <?php
 // admin/dashboard.php
 require_once '../config/database.php';
+require_once __DIR__ . '/../config/middleware.php';
+only('admin');
 requireRole(['admin', 'pembina']);
 
 $page_title = 'Dashboard';

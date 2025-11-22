@@ -1,6 +1,8 @@
 <?php
 // admin/profil.php
 require_once '../config/database.php';
+require_once __DIR__ . '/../config/middleware.php';
+only('admin');
 requireRole(['admin', 'pembina']);
 
 $page_title = 'Profil Saya';
@@ -20,8 +22,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             setFlash('danger', 'Format email tidak valid');
         } else {
-            $result = execute("
-                UPDATE users 
+            $result = query(
+                "UPDATE users 
                 SET name = ?, email = ?, no_hp = ?, alamat = ?
                 WHERE id = ?
             ", [$name, $email, $no_hp, $alamat, $current_user['id']], 'ssssi');
@@ -51,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             setFlash('danger', 'Password minimal 6 karakter');
         } else {
             $password_hash = password_hash($password_baru, PASSWORD_DEFAULT);
-            $result = execute("UPDATE users SET password = ? WHERE id = ?", [$password_hash, $current_user['id']], 'si');
+            $result = query("UPDATE users SET password = ? WHERE id = ?", [$password_hash, $current_user['id']], 'si');
             
             if ($result['success']) {
                 setFlash('success', 'Password berhasil diubah');
@@ -84,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         unlink('../' . $current_user['foto']);
                     }
                     
-                    $result = execute("UPDATE users SET foto = ? WHERE id = ?", 
+                    $result = query("UPDATE users SET foto = ? WHERE id = ?", 
                                   ['assets/img/uploads/users/' . $newname, $current_user['id']], 'si');
                     
                     if ($result['success']) {

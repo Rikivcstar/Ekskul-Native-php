@@ -2,58 +2,51 @@
 // daftar_eskul.php
 $page_title = 'Pendaftaran Ekstrakurikuler';
 require_once 'config/database.php';
+require_once 'config/middleware.php';
+only('siswa');
+// Hanya boleh diakses oleh siswa yang sudah login
+requireRole(['siswa']);
+$current_user = getCurrentUser();
+$user_id = $current_user ? (int)$current_user['id'] : 0;
+
 // Ambil daftar eskul aktif
 $eskul_list = query("SELECT * FROM ekstrakurikulers WHERE status = 'aktif' ORDER BY nama_ekskul");
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $nis = $_POST['nis'];
-    $name = $_POST['name'];
-    $kelas = $_POST['kelas'];
-    $jenis_kelamin = $_POST['jenis_kelamin'];
-    $no_hp = $_POST['no_hp'];
-    $alamat = $_POST['alamat'];
-    $email = $_POST['email'] ?? '';
-    $ekstrakurikuler_id = $_POST['ekstrakurikuler_id'];
-    $alasan_daftar = $_POST['alasan_daftar'];
-    
-    // Cek apakah NIS sudah ada
-    $cek_user = query("SELECT * FROM users WHERE nis = ?", [$nis], 's');
-    
-    if ($cek_user && $cek_user->num_rows > 0) {
-        $user = $cek_user->fetch_assoc();
-        $user_id = $user['id'];
-        
-        // Update data user (tanpa password)
-        execute("UPDATE users SET name = ?, kelas = ?, jenis_kelamin = ?, no_hp = ?, alamat = ?, email = ? WHERE id = ?",
-            [$name, $kelas, $jenis_kelamin, $no_hp, $alamat, $email, $user_id], 'ssssssi');
-    } else {
-        // Insert user baru dengan password default
-        $default_password = password_hash('password123', PASSWORD_DEFAULT); // Password default
-        
-        $result = execute(
-            "INSERT INTO users (nis, name, email, password, kelas, jenis_kelamin, no_hp, alamat, role)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            [$nis, $name, $email, $default_password, $kelas, $jenis_kelamin, $no_hp, $alamat, 'siswa'],
-            'sssssssss'
-        );
+    $ekstrakurikuler_id = (int)($_POST['ekstrakurikuler_id'] ?? 0);
+    $alasan_daftar      = trim($_POST['alasan_daftar'] ?? '');
 
-        
-        $user_id = $result['insert_id'];
+    if ($user_id <= 0) {
+        setFlash('danger', 'Sesi login Anda tidak valid. Silakan login kembali.');
+        redirect('admin/login.php');
     }
-    
+
+    if ($ekstrakurikuler_id <= 0 || $alasan_daftar === '') {
+        setFlash('danger', 'Silakan pilih ekstrakurikuler dan isi alasan mendaftar.');
+        redirect('daftar_eskul.php');
+    }
+
     // Cek apakah sudah pernah daftar eskul yang sama
-    $cek_pendaftaran = query("SELECT * FROM anggota_ekskul WHERE user_id = ? AND ekstrakurikuler_id = ?", [$user_id, $ekstrakurikuler_id], 'ii');
+    $cek_pendaftaran = query(
+        "SELECT id FROM anggota_ekskul WHERE user_id = ? AND ekstrakurikuler_id = ?",
+        [$user_id, $ekstrakurikuler_id],
+        'ii'
+    );
     
     if ($cek_pendaftaran && $cek_pendaftaran->num_rows > 0) {
         setFlash('warning', 'Anda sudah pernah mendaftar ekstrakurikuler ini!');
     } else {
         // Insert pendaftaran
         $tanggal_daftar = date('Y-m-d');
-        $result = execute("INSERT INTO anggota_ekskul (user_id, ekstrakurikuler_id, tanggal_daftar, alasan_daftar, status) VALUES (?, ?, ?, ?, 'pending')",
-            [$user_id, $ekstrakurikuler_id, $tanggal_daftar, $alasan_daftar], 'iiss');
+        $result = query(
+            "INSERT INTO anggota_ekskul (user_id, ekstrakurikuler_id, tanggal_daftar, alasan_daftar, status) 
+             VALUES (?, ?, ?, ?, 'pending')",
+            [$user_id, $ekstrakurikuler_id, $tanggal_daftar, $alasan_daftar],
+            'iiss'
+        );
         
         if ($result['success']) {
-            setFlash('success', 'Pendaftaran berhasil! Silakan tunggu konfirmasi dari admin. Password default Anda: <strong>password123</strong>');
+            setFlash('success', 'Pendaftaran ekstrakurikuler berhasil! Silakan tunggu konfirmasi dari admin/pembina.');
         } else {
             setFlash('danger', 'Pendaftaran gagal! Silakan coba lagi.');
         }
@@ -81,58 +74,43 @@ require_once 'includes/header.php';
 
                     <form method="POST" action="">
                         <h5 class="mb-3 text-success">
-                            <i class="bi bi-person-fill"></i> Data Siswa
+                            <i class="bi bi-person-fill"></i> Data Siswa (diambil dari akun Anda)
                         </h5>
                         
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">NIS <span class="text-danger">*</span></label>
-                                <input type="text" name="nis" class="form-control" required>
-                                <small class="text-muted">Nomor Induk Siswa</small>
+                                <label class="form-label">NIS</label>
+                                <input type="text" class="form-control" value="<?php echo htmlspecialchars($current_user['nis'] ?? ''); ?>" readonly>
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
-                                <input type="text" name="name" class="form-control" required>
+                                <label class="form-label">Nama Lengkap</label>
+                                <input type="text" class="form-control" value="<?php echo htmlspecialchars($current_user['name'] ?? ''); ?>" readonly>
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Kelas <span class="text-danger">*</span></label>
-                                <select name="kelas" class="form-select" required>
-                                    <option value="">Pilih Kelas</option>
-                                    <?php 
-                                    for ($i = 7; $i <= 9; $i++) {
-                                        foreach (['A', 'B', 'C', 'D'] as $huruf) {
-                                            echo "<option value='$i$huruf'>$i$huruf</option>";
-                                        }
-                                    }
-                                    ?>
-                                </select>
+                                <label class="form-label">Kelas</label>
+                                <input type="text" class="form-control" value="<?php echo htmlspecialchars($current_user['kelas'] ?? ''); ?>" readonly>
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Jenis Kelamin <span class="text-danger">*</span></label>
-                                <select name="jenis_kelamin" class="form-select" required>
-                                    <option value="">Pilih</option>
-                                    <option value="L">Laki-laki</option>
-                                    <option value="P">Perempuan</option>
-                                </select>
+                                <label class="form-label">Jenis Kelamin</label>
+                                <input type="text" class="form-control" value="<?php echo ($current_user['jenis_kelamin'] ?? '') === 'L' ? 'Laki-laki' : 'Perempuan'; ?>" readonly>
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">No HP/WA <span class="text-danger">*</span></label>
-                                <input type="text" name="no_hp" class="form-control" placeholder="081234567890" required>
+                                <label class="form-label">No HP/WA</label>
+                                <input type="text" class="form-control" value="<?php echo htmlspecialchars($current_user['no_hp'] ?? ''); ?>" readonly>
                             </div>
 
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Email</label>
-                                <input type="email" name="email" class="form-control" placeholder="email@example.com">
-                                <small class="text-muted">Opsional</small>
+                                <input type="email" class="form-control" value="<?php echo htmlspecialchars($current_user['email'] ?? ''); ?>" readonly>
                             </div>
 
                             <div class="col-md-12 mb-3">
-                                <label class="form-label">Alamat <span class="text-danger">*</span></label>
-                                <textarea name="alamat" class="form-control" rows="2" placeholder="Masukkan alamat lengkap" required></textarea>
+                                <label class="form-label">Alamat</label>
+                                <textarea class="form-control" rows="2" readonly><?php echo htmlspecialchars($current_user['alamat'] ?? ''); ?></textarea>
                             </div>
                         </div>
 
@@ -177,11 +155,6 @@ require_once 'includes/header.php';
                             </label>
                         </div>
 
-                        <div class="alert alert-warning">
-                            <i class="bi bi-key-fill"></i> <strong>Password Default:</strong> Setelah mendaftar, Anda akan mendapatkan akun dengan password: <strong>password123</strong>
-                            <br><small>Silakan ganti password setelah login pertama kali.</small>
-                        </div>
-
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-success btn-lg">
                                 <i class="bi bi-send"></i> Kirim Pendaftaran
@@ -204,7 +177,7 @@ require_once 'includes/header.php';
                         <li>Anda akan dihubungi melalui nomor HP/WA yang terdaftar</li>
                         <li>Setiap siswa dapat mendaftar maksimal 2 ekstrakurikuler</li>
                         <li>Kegiatan ekstrakurikuler wajib diikuti sesuai jadwal</li>
-                        <li>Password default untuk login: <strong>password123</strong></li>
+                        
                     </ul>
                 </div>
             </div>

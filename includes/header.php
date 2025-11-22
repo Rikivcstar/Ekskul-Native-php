@@ -74,12 +74,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
                                 <i class="bi bi-images"></i> Galeri
                             </a>
                         </li>
-                        <?php endif; ?>
                         <li>
                             <a class="inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-emerald-600/60 <?php echo $current_page == 'daftar_eskul.php' ? 'bg-emerald-600/60' : ''; ?>" href="<?php echo BASE_URL; ?>daftar_eskul.php">
                                 <i class="bi bi-pencil-square"></i> Daftar
                             </a>
                         </li>
+                        <?php endif; ?>
                         <li>
                             <a class="inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-emerald-600/60 <?php echo $current_page == 'cetak_sertifikat.php' ? 'bg-emerald-600/60' : ''; ?>" href="<?php echo BASE_URL; ?>cetak_sertifikat.php">
                                 <i class="bi bi-award-fill"></i> Sertifikat
@@ -109,7 +109,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         </li>
                         <?php else: ?>
                         <li>
-                            <a class="inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-emerald-600/60" href="<?php echo BASE_URL; ?>admin/login.php">
+                            <a class="inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-emerald-600/60 <?php echo $current_page == 'registerasi.php' ? 'bg-emerald-600/60' : ''; ?>" href="<?php echo BASE_URL; ?>registerasi.php">
+                                <i class="bi bi-person-plus-fill"></i> Registrasi
+                            </a>
+                        </li>
+                        <li>
+                            <a class="inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-emerald-600/60 <?php echo $current_page == 'login.php' ? 'bg-emerald-600/60' : ''; ?>" href="<?php echo BASE_URL; ?>admin/login.php">
                                 <i class="bi bi-box-arrow-in-right"></i> Login
                             </a>
                         </li>
@@ -125,12 +130,13 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     <li><a class="block px-3 py-2 rounded-lg hover:bg-emerald-600/60" href="<?php echo BASE_URL; ?>update_kegiatan.php">Kegiatan</a></li>
                     <?php if (isset($_SESSION['user_id']) && hasRole(['siswa'])): ?>
                     <li><a class="block px-3 py-2 rounded-lg hover:bg-emerald-600/60" href="<?php echo BASE_URL; ?>siswa/galeri.php">Galeri</a></li>
-                    <?php endif; ?>
                     <li><a class="block px-3 py-2 rounded-lg hover:bg-emerald-600/60" href="<?php echo BASE_URL; ?>daftar_eskul.php">Daftar</a></li>
+                    <?php endif; ?>
                     <li><a class="block px-3 py-2 rounded-lg hover:bg-emerald-600/60" href="<?php echo BASE_URL; ?>cetak_sertifikat.php">Sertifikat</a></li>
                     <?php if (isset($_SESSION['user_id'])): ?>
                     <li><a class="block px-3 py-2 rounded-lg hover:bg-emerald-600/60" href="<?php echo BASE_URL; ?><?php echo hasRole('siswa') ? 'siswa' : 'admin'; ?>/logout.php">Logout</a></li>
                     <?php else: ?>
+                    <li><a class="block px-3 py-2 rounded-lg hover:bg-emerald-600/60" href="<?php echo BASE_URL; ?>registerasi.php">Registrasi</a></li>
                     <li><a class="block px-3 py-2 rounded-lg hover:bg-emerald-600/60" href="<?php echo BASE_URL; ?>admin/login.php">Login</a></li>
                     <?php endif; ?>
                 </ul>

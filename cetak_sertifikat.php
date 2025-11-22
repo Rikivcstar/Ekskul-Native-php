@@ -1,7 +1,11 @@
 <?php
 // cetak_sertifikat.php (Fixed Layout - Tidak Tumpang Tindih)
+require_once 'config/database.php';
+require_once 'config/middleware.php';
+only('siswa');
+requireRole(['siswa']);
+
 $page_title = 'Cetak Sertifikat';
-require_once 'includes/header.php';
 
 $print_mode = false;
 $sertifikat = null;
@@ -48,7 +52,7 @@ if (isset($_POST['nis']) || isset($_GET['nis']) || isset($_GET['id'])) {
             $tanggal_terbit = date('Y-m-d');
             $aid = $sertifikat['anggota_id'] ?? $anggota_id;
             
-            execute("INSERT INTO sertifikats (anggota_id, nomor_sertifikat, tanggal_terbit) VALUES (?, ?, ?)",
+            query("INSERT INTO sertifikats (anggota_id, nomor_sertifikat, tanggal_terbit) VALUES (?, ?, ?)",
                 [$aid, $nomor, $tanggal_terbit], 'iss');
             
             $sertifikat['nomor_sertifikat'] = $nomor;
@@ -59,6 +63,11 @@ if (isset($_POST['nis']) || isset($_GET['nis']) || isset($_GET['id'])) {
             $print_mode = true;
         }
     }
+}
+
+//  Hanya load header jika BUKAN mode print
+if (!$print_mode) {
+    require_once 'includes/header.php';
 }
 
 // Predikat sekolah (bisa diubah manual di sini)
@@ -156,8 +165,13 @@ $tahun_kurikulum = date('Y') . '/' . (date('Y') + 1);
     </div>
 </section>
 
+<?php 
+// Hanya load footer jika BUKAN mode print
+require_once 'includes/footer.php'; 
+?>
+
 <?php else: ?>
-<!-- CERTIFICATE DESIGN - FIXED LAYOUT -->
+<!-- CERTIFICATE DESIGN - FULL PAGE WITHOUT NAVBAR -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -389,7 +403,7 @@ $tahun_kurikulum = date('Y') . '/' . (date('Y') + 1);
         }
         
         .nilai-B {
-            background: #ffc107 !important;
+            background: skyblue !important;
             color: #000 !important;
         }
         
@@ -411,9 +425,7 @@ $tahun_kurikulum = date('Y') . '/' . (date('Y') + 1);
             font-style: italic;
             margin-top: 10px;
             padding: 8px 18px;
-            background: rgba(255, 255, 255, 0.85);
             border-radius: 6px;
-            border-left: 3px solid #003366;
             max-width: 550px;
             margin-left: auto;
             margin-right: auto;
@@ -424,17 +436,19 @@ $tahun_kurikulum = date('Y') . '/' . (date('Y') + 1);
             position: absolute;
             bottom: 25mm;
             left: 40mm;
+            width: 200px;
+            height: auto;
         }
         
         .signature-block {
-            width: 200px;
+            width: 100%;
             text-align: center;
         }
         
         .sig-location {
             font-size: 11px;
             color: #555;
-            margin-bottom: 5px;
+            margin: 0 0 5px 0;
             font-weight: 600;
         }
         
@@ -442,7 +456,7 @@ $tahun_kurikulum = date('Y') . '/' . (date('Y') + 1);
             font-size: 12px;
             font-weight: 700;
             color: #003366;
-            margin-bottom: 6px;
+            margin: 0 0 6px 0;
             text-transform: uppercase;
         }
         
@@ -451,6 +465,7 @@ $tahun_kurikulum = date('Y') . '/' . (date('Y') + 1);
             height: 65px;
             margin: 6px auto;
             display: block;
+            object-fit: contain;
         }
         
         .sig-name {
@@ -459,14 +474,14 @@ $tahun_kurikulum = date('Y') . '/' . (date('Y') + 1);
             color: #003366;
             border-top: 2px solid #003366;
             padding-top: 6px;
-            margin-top: 4px;
+            margin: 4px 0 0 0;
             text-transform: uppercase;
         }
         
         .sig-nip {
             font-size: 10px;
             color: #777;
-            margin-top: 3px;
+            margin: 3px 0 0 0;
         }
         
         /* Certificate Number - TENGAH BAWAH */
@@ -511,7 +526,7 @@ $tahun_kurikulum = date('Y') . '/' . (date('Y') + 1);
             }
             
             .nilai-B {
-                background: #ffc107 !important;
+                background: skyblue !important;
                 color: #000 !important;
             }
             
@@ -594,9 +609,9 @@ $tahun_kurikulum = date('Y') . '/' . (date('Y') + 1);
         <div class="signature-area">
             <div class="signature-block">
                 <div class="sig-location">Lebak, <?php echo formatTanggal($sertifikat['tanggal_terbit']); ?></div>
-                <div class="sig-title">Ketua Pembina Ekstrakurikuler</div>
+                <div class="sig-title">Ketua Kurikulum</div>
                 <!-- Digital Signature Image -->
-                <img src="<?php echo BASE_URL; ?>assets/img/stempel.jpg" alt="Signature" class="sig-image h-30">
+                <img src="<?php echo BASE_URL; ?>assets/img/stempel.jpg" alt="Signature" class="sig-image">
                 <div class="sig-name">Fajar Satria Utama</div>
                 <div class="sig-nip">NIP. 198505152010011023</div>
             </div>
@@ -611,5 +626,3 @@ $tahun_kurikulum = date('Y') . '/' . (date('Y') + 1);
 </html>
 <?php exit; ?>
 <?php endif; ?>
-
-<?php require_once 'includes/footer.php'; ?>

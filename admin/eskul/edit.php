@@ -1,7 +1,9 @@
 <?php
 // admin/eskul/edit.php
 require_once '../../config/database.php';
-requireRole(['admin', 'pembina']);
+require_once __DIR__ . '/../../config/middleware.php';
+only('admin');
+requireRole(['admin']);
 
 $page_title = 'Edit Ekstrakurikuler';
 $current_user = getCurrentUser();
@@ -49,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             nama_ekskul = ?, deskripsi = ?, pembina_id = ?, gambar = ?, kuota = ?, status = ?
             WHERE id = ?";
     
-    $result = execute($sql, [$nama_ekskul, $deskripsi, $pembina_id, $gambar, $kuota, $status, $id], 'ssisssi');
+    $result = query($sql, [$nama_ekskul, $deskripsi, $pembina_id, $gambar, $kuota, $status, $id], 'ssisssi');
     
     if ($result['success']) {
         setFlash('success', 'Ekstrakurikuler berhasil diupdate!');

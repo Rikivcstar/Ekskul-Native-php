@@ -1,7 +1,9 @@
 <?php
 // admin/prestasi/tambah.php
 require_once '../../config/database.php';
-requireRole(['admin', 'pembina']);
+require_once __DIR__ . '/../../config/middleware.php';
+only('admin');
+requireRole(['admin']);
 
 $page_title = 'Tambah Prestasi';
 $current_user = getCurrentUser();
@@ -58,11 +60,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 ekstrakurikuler_id = ?, anggota_id = ?, nama_prestasi = ?, tingkat = ?, 
                 peringkat = ?, tanggal = ?, penyelenggara = ?, deskripsi = ?, sertifikat = ?
                 WHERE id = ?";
-        $result = execute($sql, [$ekstrakurikuler_id, $anggota_id, $nama_prestasi, $tingkat, $peringkat, $tanggal, $penyelenggara, $deskripsi, $sertifikat, $id], 'iisssssssi');
+        $result = query($sql, [$ekstrakurikuler_id, $anggota_id, $nama_prestasi, $tingkat, $peringkat, $tanggal, $penyelenggara, $deskripsi, $sertifikat, $id], 'iisssssssi');
     } else {
         $sql = "INSERT INTO prestasis (ekstrakurikuler_id, anggota_id, nama_prestasi, tingkat, peringkat, tanggal, penyelenggara, deskripsi, sertifikat) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        $result = execute($sql, [$ekstrakurikuler_id, $anggota_id, $nama_prestasi, $tingkat, $peringkat, $tanggal, $penyelenggara, $deskripsi, $sertifikat], 'iisssssss');
+        $result = query($sql, [$ekstrakurikuler_id, $anggota_id, $nama_prestasi, $tingkat, $peringkat, $tanggal, $penyelenggara, $deskripsi, $sertifikat], 'iisssssss');
     }
     
     if ($result['success']) {

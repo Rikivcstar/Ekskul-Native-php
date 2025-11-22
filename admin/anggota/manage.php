@@ -1,7 +1,9 @@
 <?php
 // admin/anggota/manage.php
 require_once '../../config/database.php';
-requireRole(['admin', 'pembina']);
+require_once __DIR__ . '/../../config/middleware.php';
+only('admin');
+requireRole(['admin']);
 
 $page_title = 'Kelola Anggota';
 $current_user = getCurrentUser();
@@ -15,18 +17,18 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
     $id = $_GET['id'];
     
     if ($action == 'approve') {
-        $result = execute("UPDATE anggota_ekskul SET status = 'diterima', tanggal_diterima = CURDATE() WHERE id = ?", [$id], 'i');
+        $result = query("UPDATE anggota_ekskul SET status = 'diterima', tanggal_diterima = CURDATE() WHERE id = ?", [$id], 'i');
         if ($result['success']) {
             setFlash('success', 'Pendaftaran berhasil disetujui!');
         }
     } elseif ($action == 'reject') {
-        $result = execute("UPDATE anggota_ekskul SET status = 'ditolak' WHERE id = ?", [$id], 'i');
+        $result = query("UPDATE anggota_ekskul SET status = 'ditolak' WHERE id = ?", [$id], 'i');
         if ($result['success']) {
             setFlash('success', 'Pendaftaran berhasil ditolak!');
         }
     } elseif ($action == 'delete') {
         // Hapus Anggota (Delete)
-        $result = execute("DELETE FROM anggota_ekskul WHERE id = ?", [$id], 'i');
+        $result = query("DELETE FROM anggota_ekskul WHERE id = ?", [$id], 'i');
         if ($result['success']) {
             setFlash('success', 'Anggota berhasil dihapus dari ekstrakurikuler.');
         } else {
@@ -44,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_anggota'])) {
 
     // Tambahkan logika update sesuai kebutuhan Anda (misal: hanya update nilai)
     if ($nilai !== null) {
-        $result = execute("UPDATE anggota_ekskul SET nilai = ? WHERE id = ?", [$nilai, $anggota_id], 'si');
+        $result = query("UPDATE anggota_ekskul SET nilai = ? WHERE id = ?", [$nilai, $anggota_id], 'si');
         if ($result['success']) {
             setFlash('success', 'Nilai anggota berhasil diperbarui.');
         } else {
@@ -350,6 +352,46 @@ $belum_dinilai = query("SELECT COUNT(*) as total FROM anggota_ekskul WHERE statu
     </div>
   </div>
 </div>
+<!-- Modal konfirmasi dihapus (Pengganti alert/confirm) -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmDeleteModalLabel">Konfirmasi Hapus</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Apakah Anda yakin ingin menghapus Anggota ini? Aksi ini tidak dapat dibatalkan.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <a id="deleteButton" href="#" class="btn btn-danger">Hapus</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    // Menambahkan fungsi modal untuk konfirmasi hapus (menggantikan window.confirm)
+    document.addEventListener('DOMContentLoaded', function() {
+        let deleteLinks = document.querySelectorAll('a[href*="action=delete"]');
+        deleteLinks.forEach(function(link) {
+            link.removeAttribute('onclick'); // Hapus onclick lama
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                let deleteUrl = this.getAttribute('href');
+                
+                // Set URL di tombol Hapus Modal
+                let deleteButton = document.getElementById('deleteButton');
+                deleteButton.setAttribute('href', deleteUrl);
+                
+                // Tampilkan Modal
+                let confirmModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+                confirmModal.show();
+            });
+        });
+    });
+</script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     var editAnggotaModal = document.getElementById('editAnggotaModal');

@@ -1,6 +1,8 @@
 <?php
 // admin/users/tambah.php
 require_once '../../config/database.php';
+require_once __DIR__ . '/../../config/middleware.php';
+only('admin');
 requireRole(['admin']);
 
 $page_title = 'Tambah User';
@@ -20,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $sql = "INSERT INTO users (name, email, nis, password, role, kelas, jenis_kelamin, no_hp, alamat) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
     
-    $result = execute($sql, [$name, $email, $nis, $password, $role, $kelas, $jenis_kelamin, $no_hp, $alamat], 'sssssssss');
+    $result = query($sql, [$name, $email, $nis, $password, $role, $kelas, $jenis_kelamin, $no_hp, $alamat], 'sssssssss');
     
     if ($result['success']) {
         setFlash('success', 'User berhasil ditambahkan!');

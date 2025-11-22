@@ -29,53 +29,80 @@ function getConnection() {
     }
 }
 
+// Buat koneksi global
+$db = getConnection();
+
 // Fungsi untuk query dengan prepared statement
-function query($sql, $params = [], $types = "") {
-    $conn = getConnection();
-    $stmt = $conn->prepare($sql);
-    
-    if ($params && $types) {
-        $stmt->bind_param($types, ...$params);
+function query($sql, $params = [], $types = null)
+{
+    global $db;
+
+    // Deteksi jenis query
+    $sql_trimmed = trim($sql);
+    $is_select = stripos($sql_trimmed, 'SELECT') === 0;
+
+    // Jika tidak ada parameter → jalankan query biasa
+    if (empty($params)) {
+        $result = $db->query($sql);
+
+        if ($db->error) {
+            // Untuk non-SELECT, kembalikan array dengan error
+            if (!$is_select) {
+                return ['success' => false, 'error' => $db->error];
+            }
+            throw new Exception("SQL Error: " . $db->error . " | Query: $sql");
+        }
+
+        // SELECT → kembalikan mysqli_result (backward compatible)
+        if ($is_select) {
+            return $result;
+        }
+        
+        // INSERT/UPDATE/DELETE → kembalikan array
+        return ['success' => true, 'affected_rows' => $db->affected_rows];
+    }
+
+    // Jika ada parameter → gunakan prepared statement
+    $stmt = $db->prepare($sql);
+    if (!$stmt) {
+        if (!$is_select) {
+            return ['success' => false, 'error' => $db->error];
+        }
+        throw new Exception("Prepare failed: " . $db->error . " | Query: $sql");
+    }
+
+    // Jika belum dikasih $types → buat otomatis
+    if ($types === null) {
+        $types = "";
+        foreach ($params as $p) {
+            if (is_int($p)) $types .= "i";
+            elseif (is_float($p)) $types .= "d";
+            else $types .= "s"; // default string
+        }
+    }
+
+    $stmt->bind_param($types, ...$params);
+
+    if (!$stmt->execute()) {
+        if (!$is_select) {
+            return ['success' => false, 'error' => $stmt->error];
+        }
+        throw new Exception("Execute failed: " . $stmt->error);
+    }
+
+    // SELECT → kembalikan mysqli_result (backward compatible)
+    if ($is_select) {
+        return $stmt->get_result();
     }
     
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    $stmt->close();
-    $conn->close();
-    
-    return $result;
-}
-
-// Fungsi untuk insert/update/delete
-function execute($sql, $params = [], $types = "") {
-    $conn = getConnection();
-    $stmt = $conn->prepare($sql);
-    
-    if ($params && $types) {
-        $stmt->bind_param($types, ...$params);
-    }
-    
-    $result = $stmt->execute();
-    $affected = $stmt->affected_rows;
-    $insert_id = $stmt->insert_id ?: $conn->insert_id;
-
-    
-    $stmt->close();
-    $conn->close();
-    
-    return [
-        'success' => $result,
-        'affected_rows' => $affected,
-        'insert_id' => $insert_id
-    ];
+    // INSERT/UPDATE/DELETE → kembalikan array
+    return ['success' => true, 'affected_rows' => $stmt->affected_rows];
 }
 
 // Fungsi untuk escape string
 function escape($string) {
-    $conn = getConnection();
-    $escaped = $conn->real_escape_string($string);
-    $conn->close();
+    global $db;
+    $escaped = $db->real_escape_string($string);
     return $escaped;
 }
 
@@ -127,16 +154,11 @@ function hasRole($roles) {
     return in_array($_SESSION['user_role'], $roles);
 }
 
-// Fungsi untuk require login
-function requireLogin() {
+// Fungsi untuk require role tertentu
+function requireRole_old($roles) {
     if (!isLoggedIn()) {
         redirect('admin/login.php');
     }
-}
-
-// Fungsi untuk require role tertentu
-function requireRole($roles) {
-    requireLogin();
     if (!hasRole($roles)) {
         setFlash('danger', 'Anda tidak memiliki akses ke halaman ini!');
         redirect('');
@@ -145,10 +167,16 @@ function requireRole($roles) {
 
 // Fungsi untuk get current user
 function getCurrentUser() {
-    if (!isLoggedIn()) return null;
+    if (!isset($_SESSION['user_id'])) return false;
+
     $id = $_SESSION['user_id'];
     $result = query("SELECT * FROM users WHERE id = ?", [$id], 'i');
-    return $result ? $result->fetch_assoc() : null;
+
+    if (!$result || $result->num_rows === 0) {
+        return false;
+    }
+
+    return $result->fetch_assoc();
 }
 
 // Fungsi untuk format tanggal Indonesia

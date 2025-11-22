@@ -1,6 +1,8 @@
 <?php
 // admin/eskul/hapus.php
 require_once '../../config/database.php';
+require_once __DIR__ . '/../../config/middleware.php';
+only('admin');
 requireRole(['admin']);
 
 $id = $_GET['id'] ?? 0;
@@ -17,7 +19,7 @@ if ($eskul && $eskul->num_rows > 0) {
     }
     
     // Hapus data
-    $result = execute("DELETE FROM ekstrakurikulers WHERE id = ?", [$id], 'i');
+    $result = query("DELETE FROM ekstrakurikulers WHERE id = ?", [$id], 'i');
     
     if ($result['success']) {
         setFlash('success', 'Ekstrakurikuler berhasil dihapus!');

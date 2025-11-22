@@ -1,7 +1,9 @@
 <?php
 // admin/laporan/cetak_anggota.php
 require_once '../../config/database.php';
-requireRole(['admin', 'pembina']);
+require_once __DIR__ . '/../../config/middleware.php';
+only('admin');
+requireRole(['admin']);
 
 $eskul_id = $_GET['eskul_id'] ?? 0;
 

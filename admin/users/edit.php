@@ -1,6 +1,8 @@
 <?php
 // admin/users/edit.php
 require_once '../../config/database.php';
+require_once __DIR__ . '/../../config/middleware.php';
+only('admin');
 requireRole(['admin']);
 
 $page_title = 'Edit User';
@@ -30,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $alamat = $_POST['alamat'] ?? NULL;
         $is_active = isset($_POST['is_active']) ? 1 : 0;
         
-        $result = execute("
+        $result = query("
             UPDATE users 
             SET name = ?, email = ?, nis = ?, kelas = ?, jenis_kelamin = ?, no_hp = ?, alamat = ?, is_active = ?
             WHERE id = ?
@@ -55,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             setFlash('danger', 'Password minimal 6 karakter!');
         } else {
             $password_hash = password_hash($password_baru, PASSWORD_DEFAULT);
-            $result = execute("UPDATE users SET password = ? WHERE id = ?", [$password_hash, $id], 'si');
+            $result = query("UPDATE users SET password = ? WHERE id = ?", [$password_hash, $id], 'si');
             
             if ($result['success']) {
                 setFlash('success', 'Password berhasil direset!');
@@ -89,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         unlink('../../' . $data['foto']);
                     }
                     
-                    $result = execute("UPDATE users SET foto = ? WHERE id = ?", 
+                    $result = query("UPDATE users SET foto = ? WHERE id = ?", 
                                   ['assets/img/uploads/users/' . $newname, $id], 'si');
                     
                     if ($result['success']) {
@@ -158,9 +160,9 @@ if ($data['role'] == 'siswa') {
                     <?php if ($data['foto']): ?>
                     <img src="<?php echo BASE_URL . $data['foto']; ?>" 
                          class="rounded-circle profile-img mb-3" 
-                         alt="Foto Profil">
+                         alt="Foto Profil" style="width: 200px; height: 200px; object-fit: cover;">
                     <?php else: ?>
-                    <div class="rounded-circle profile-img mb-3 mx-auto bg-success text-white d-flex align-items-center justify-content-center" style="font-size: 5rem;">
+                    <div class="rounded-circle profile-img mb-3 mx-auto bg-success text-white d-flex align-items-center justify-content-center" style="font-size: 5rem; width: 200px; height: 200px;" >
                         <i class="bi bi-person-circle"></i>
                     </div>
                     <?php endif; ?>

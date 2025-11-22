@@ -1,26 +1,28 @@
 <?php
-// admin/eskul/index.php
-require_once '../../config/database.php';
-requireRole(['admin', 'pembina']);
+    // admin/eskul/index.php
+    require_once '../../config/database.php';
+    require_once __DIR__ . '/../../config/middleware.php';
+    only('admin');
+    requireRole(['admin']);
 
-$page_title = 'Kelola Ekstrakurikuler';
-$current_user = getCurrentUser();
+    $page_title = 'Kelola Ekstrakurikuler';
+    $current_user = getCurrentUser();
 
-// Ambil semua data eskul
-$eskul = query("
-    SELECT e.*, 
-    u.name as nama_pembina,
-    (SELECT COUNT(*) FROM anggota_ekskul WHERE ekstrakurikuler_id = e.id AND status = 'diterima') as jumlah_anggota
-    FROM ekstrakurikulers e
-    LEFT JOIN users u ON e.pembina_id = u.id
-    ORDER BY e.created_at DESC
-");
+    // Ambil semua data eskul
+    $eskul = query("
+        SELECT e.*, 
+        u.name as nama_pembina,
+        (SELECT COUNT(*) FROM anggota_ekskul WHERE ekstrakurikuler_id = e.id AND status = 'diterima') as jumlah_anggota
+        FROM ekstrakurikulers e
+        LEFT JOIN users u ON e.pembina_id = u.id
+        ORDER BY e.created_at DESC
+    ");
 
-// Statistik Penilaian untuk badge
-$belum_dinilai = query("SELECT COUNT(*) as total FROM anggota_ekskul WHERE status = 'diterima' AND nilai = ''")->fetch_assoc()['total'];
-?>
-<?php include __DIR__ . '/../../includes/berry_head.php'; ?>
-<?php include __DIR__ . '/../../includes/berry_shell_open.php'; ?>
+    // Statistik Penilaian untuk badge
+    $belum_dinilai = query("SELECT COUNT(*) as total FROM anggota_ekskul WHERE status = 'diterima' AND nilai = ''")->fetch_assoc()['total'];
+    ?>
+    <?php include __DIR__ . '/../../includes/berry_head.php'; ?>
+    <?php include __DIR__ . '/../../includes/berry_shell_open.php'; ?>
 <div class="p-4">
     <?php
     $flash = getFlash();
@@ -124,6 +126,47 @@ $belum_dinilai = query("SELECT COUNT(*) as total FROM anggota_ekskul WHERE statu
         </div>
     </div>
 </div>
+
+<!-- Modal konfirmasi dihapus (Pengganti alert/confirm) -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmDeleteModalLabel">Konfirmasi Hapus</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Apakah Anda yakin ingin menghapus ekstrakurikuler ini? Aksi ini tidak dapat dibatalkan.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <a id="deleteButton" href="#" class="btn btn-danger">Hapus</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    // Menambahkan fungsi modal untuk konfirmasi hapus (menggantikan window.confirm)
+    document.addEventListener('DOMContentLoaded', function() {
+        let deleteLinks = document.querySelectorAll('a[href*="hapus.php"]');
+        deleteLinks.forEach(function(link) {
+            link.removeAttribute('onclick'); // Hapus onclick lama
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                    let deleteUrl = this.getAttribute('href');
+                
+                // Set URL di tombol Hapus Modal
+                    let deleteButton = document.getElementById('deleteButton');
+                deleteButton.setAttribute('href', deleteUrl);
+                
+                // Tampilkan Modal
+                    let confirmModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+                confirmModal.show();
+            });
+        });
+    });
+</script>
 <?php include __DIR__ . '/../../includes/berry_shell_close.php'; ?>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="<?php echo BASE_URL; ?>assets/js/script.js"></script>

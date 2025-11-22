@@ -1,7 +1,9 @@
 <?php
 // admin/presensi/input.php
 require_once '../../config/database.php';
-requireRole(['admin', 'pembina']);
+require_once __DIR__ . '/../../config/middleware.php';
+only('admin');
+requireRole(['admin']);
 
 $page_title = 'Input Presensi';
 $current_user = getCurrentUser();
@@ -34,11 +36,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_presensi'])) {
         
         if ($check && $check->num_rows > 0) {
             // Update
-            execute("UPDATE presensis SET status = ?, keterangan = ?, waktu_presensi = NOW() WHERE anggota_id = ? AND tanggal = ?",
+            query("UPDATE presensis SET status = ?, keterangan = ?, waktu_presensi = NOW() WHERE anggota_id = ? AND tanggal = ?",
                 [$status, $keterangan, $anggota_id, $tanggal], 'ssis');
         } else {
             // Insert
-            execute("INSERT INTO presensis (anggota_id, tanggal, status, keterangan, waktu_presensi) VALUES (?, ?, ?, ?, NOW())",
+            query("INSERT INTO presensis (anggota_id, tanggal, status, keterangan, waktu_presensi) VALUES (?, ?, ?, ?, NOW())",
                 [$anggota_id, $tanggal, $status, $keterangan], 'isss');
         }
         $success_count++;
@@ -122,11 +124,11 @@ if (isset($_GET['eskul']) && isset($_GET['tanggal'])) {
                 
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-success text-white">
-                        <h5 class="mb-0">Daftar Anggota - <?php echo formatTanggal($selected_tanggal); ?></h5>
+                        <h5 class="mb-0 text-white">Daftar Anggota - <?php echo formatTanggal($selected_tanggal); ?></h5>
                     </div>
                     <div class="card-body">
                         <div class="alert alert-info">
-                            <i class="bi bi-info-circle"></i> Centang checkbox untuk menandai status presensi
+                            <i class="bi bi-info-circle"></i> Select untuk menandai status presensi
                         </div>
 
                         <?php if ($anggota_list->num_rows > 0): ?>

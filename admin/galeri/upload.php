@@ -1,7 +1,9 @@
 <?php
 // admin/galeri/upload.php
 require_once '../../config/database.php';
-requireRole(['admin', 'pembina']);
+require_once __DIR__ . '/../../config/middleware.php';
+only('admin');
+requireRole(['admin']);
 
 $page_title = 'Upload Foto Galeri';
 $current_user = getCurrentUser();
@@ -46,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $gambar = $upload['filename'];
                     $judul_foto = $judul . ($total_files > 1 ? ' - Foto ' . ($i + 1) : '');
                     
-                    execute("INSERT INTO galeris (ekstrakurikuler_id, judul, gambar, deskripsi, tanggal_upload, urutan) 
+                    query("INSERT INTO galeris (ekstrakurikuler_id, judul, gambar, deskripsi, tanggal_upload, urutan) 
                             VALUES (?, ?, ?, ?, ?, ?)",
                         [$ekstrakurikuler_id, $judul_foto, $gambar, $deskripsi, $tanggal_upload, $urutan], 'issssi');
                     

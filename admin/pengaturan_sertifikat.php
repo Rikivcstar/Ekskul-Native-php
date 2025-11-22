@@ -1,6 +1,8 @@
 <?php
 // admin/pengaturan_sertifikat.php
 require_once '../config/database.php';
+require_once __DIR__ . '/../config/middleware.php';
+only('admin');
 requireRole(['admin']);
 
 $page_title = 'Pengaturan Sertifikat';
@@ -28,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_pengaturan']))
     $success = true;
     // UPSERT agar kunci baru otomatis dibuat jika belum ada
     foreach ($updates as $update) {
-        $result = execute(
+        $result = query(
             "INSERT INTO pengaturan (key_name, key_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE key_value = VALUES(key_value)",
             [$update[0], $update[1]],
             'ss'
@@ -93,7 +95,7 @@ $belum_dinilai = query("SELECT COUNT(*) as total FROM anggota_ekskul WHERE statu
             <div class="col-lg-8">
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="bi bi-award"></i> Data Sertifikat</h5>
+                        <h5 class="mb-0 text-white"><i class="bi bi-award"></i> Data Sertifikat</h5>
                     </div>
                     <div class="card-body">
                         <form method="POST">
@@ -137,7 +139,7 @@ $belum_dinilai = query("SELECT COUNT(*) as total FROM anggota_ekskul WHERE statu
 
                             <div class="mb-4">
                                 <label class="form-label fw-bold">
-                                    <i class="bi bi-person-badge"></i> Nama Ketua Pembina
+                                    <i class="bi bi-person-badge"></i> Nama Ketua Kurikulum
                                 </label>
                                 <input type="text" name="nama_pembina" class="form-control" 
                                        value="<?php echo htmlspecialchars($settings['nama_pembina'] ?? 'Fajar Satria Utama'); ?>" required>
@@ -146,7 +148,7 @@ $belum_dinilai = query("SELECT COUNT(*) as total FROM anggota_ekskul WHERE statu
 
                             <div class="mb-4">
                                 <label class="form-label fw-bold">
-                                    <i class="bi bi-credit-card"></i> NIP Ketua Pembina
+                                    <i class="bi bi-credit-card"></i> NIP Ketua Kurikulum
                                 </label>
                                 <input type="text" name="nip_pembina" class="form-control" 
                                        value="<?php echo htmlspecialchars($settings['nip_pembina'] ?? '198505152010011023'); ?>" required>
