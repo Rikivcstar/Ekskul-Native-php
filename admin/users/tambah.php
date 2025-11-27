@@ -11,7 +11,7 @@ $current_user = getCurrentUser();
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $name = $_POST['name'];
     $email = $_POST['email'] ?? NULL;
-    $nis = $_POST['nis'] ?? NULL;
+    $nisn = $_POST['nisn'] ?? NULL;
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
     $role = $_POST['role'];
     $kelas = $_POST['kelas'] ?? NULL;
@@ -19,10 +19,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $no_hp = $_POST['no_hp'] ?? NULL;
     $alamat = $_POST['alamat'] ?? NULL;
     
-    $sql = "INSERT INTO users (name, email, nis, password, role, kelas, jenis_kelamin, no_hp, alamat) 
+    $sql = "INSERT INTO users (name, email, nisn, password, role, kelas, jenis_kelamin, no_hp, alamat) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
     
-    $result = query($sql, [$name, $email, $nis, $password, $role, $kelas, $jenis_kelamin, $no_hp, $alamat], 'sssssssss');
+    $result = query($sql, [$name, $email, $nisn, $password, $role, $kelas, $jenis_kelamin, $no_hp, $alamat], 'sssssssss');
     
     if ($result['success']) {
         setFlash('success', 'User berhasil ditambahkan!');
@@ -68,8 +68,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </div>
 
                     <div class="col-md-6 mb-3 d-none" id="nisField">
-                        <label class="form-label">NIS <span class="text-danger">*</span></label>
-                        <input type="text" name="nis" class="form-control">
+                        <label class="form-label">NISN <span class="text-danger">*</span></label>
+                        <input type="text" name="nisn" class="form-control">
                     </div>
 
                     <div class="col-md-6 mb-3">

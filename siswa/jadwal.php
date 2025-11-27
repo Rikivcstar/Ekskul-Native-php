@@ -118,7 +118,7 @@ require_once '../includes/berry_siswa_shell_open.php';
 <?php if (count($jadwal) > 0): ?>
   <div class="card border-0 shadow-sm mb-4">
     <div class="card-header bg-primary text-white">
-      <h5 class="mb-0"><i class="bi bi-calendar-range"></i> Jadwal Mingguan</h5>
+      <h5 class="mb-0 text-white"><i class="bi bi-calendar-range"></i> Jadwal Mingguan</h5>
     </div>
     <div class="card-body p-0">
       <div class="table-responsive">

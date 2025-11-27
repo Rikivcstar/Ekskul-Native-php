@@ -17,7 +17,7 @@ function redirectToDashboard($role) {
             header("Location: " . BASE_URL . "siswa/dashboard.php");
             break;
         default:
-            header("Location: " . BASE_URL . "admin/login.php");
+            header("Location: " . BASE_URL . "index.php");
     }
     exit;
 }
@@ -25,7 +25,7 @@ function redirectToDashboard($role) {
 function requireLogin() {
     if (!isset($_SESSION['user_id'])) {
         $_SESSION['error_message'] = "Silakan login terlebih dahulu!";
-        header("Location: " . BASE_URL . "admin/login.php");
+        header("Location: " . BASE_URL . "index.php");
         exit;
     }
 
@@ -34,7 +34,7 @@ function requireLogin() {
     // Jika user tidak ditemukan di DB (akun sudah dihapus)
     if (!$user) {
         session_destroy();
-        header("Location: " . BASE_URL . "admin/login.php");
+        header("Location: " . BASE_URL . "index.php");
         exit;
     }
 

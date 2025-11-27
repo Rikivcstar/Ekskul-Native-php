@@ -32,18 +32,18 @@ $anggota = query("
     SELECT 
         ae.id,
         COALESCE(u.name) as name,
-        u.nis
+        u.nisn
     FROM anggota_ekskul ae
     JOIN users u ON ae.user_id = u.id
     WHERE ae.ekstrakurikuler_id = ? AND ae.status = 'diterima'
-    ORDER BY u.nis ASC
+    ORDER BY u.nisn ASC
 ", [$eskul_id], 'i');
 
 $result = [];
 while ($row = $anggota->fetch_assoc()) {
     $result[] = [
         'id' => $row['id'],
-        'name' => $row['name'] . ' (' . $row['nis'] . ')'
+        'name' => $row['name'] . ' (' . $row['nisn'] . ')'
     ];
 }
 

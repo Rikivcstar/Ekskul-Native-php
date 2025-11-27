@@ -104,7 +104,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                                     <li><a class="block px-3 py-2 rounded-lg hover:bg-slate-100" href="<?php echo BASE_URL; ?>siswa/sertifikat.php"><i class="bi bi-award"></i> Sertifikat</a></li>
                                 <?php endif; ?>
                                 <li><hr class="my-1 border-slate-200"></li>
-                                <li><a class="block px-3 py-2 rounded-lg hover:bg-slate-100" href="<?php echo BASE_URL; ?><?php echo hasRole('siswa') ? 'siswa' : 'admin'; ?>/logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                                <li><a class="block px-2 py-2 rounded-lg hover:bg-slate-100" href="<?php echo BASE_URL; ?><?php echo hasRole('siswa') ? 'siswa' : 'admin'; ?>/logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
                             </ul>
                         </li>
                         <?php else: ?>
@@ -113,11 +113,23 @@ $current_page = basename($_SERVER['PHP_SELF']);
                                 <i class="bi bi-person-plus-fill"></i> Registrasi
                             </a>
                         </li>
-                        <li>
-                            <a class="inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-emerald-600/60 <?php echo $current_page == 'login.php' ? 'bg-emerald-600/60' : ''; ?>" href="<?php echo BASE_URL; ?>admin/login.php">
-                                <i class="bi bi-box-arrow-in-right"></i> Login
-                            </a>
-                        </li>
+                        <div class="dropdown">
+                            <button class="btn btn-transparent text-white dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Masuk
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="inline-flex items-center gap-2 px-3 py-2 rounded-lg <?php echo $current_page == 'login.php' ? 'bg-emerald-600/60' : ''; ?>" href="<?php echo BASE_URL; ?>login.php">
+                                         Login Siswa
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="inline-flex items-center gap-2 px-3 py-2 rounded-lg  <?php echo $current_page == 'login.php' ? 'bg-emerald-600/60' : ''; ?>" href="<?php echo BASE_URL; ?>admin/login_admin.php">
+                                         Login Admin & Pembina
+                                    </a>
+                                </li>
+                            </ul>
+                         </div>
                         <?php endif; ?>
                     </ul>
                 </nav>

@@ -79,8 +79,8 @@ require_once 'includes/header.php';
                         
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">NIS</label>
-                                <input type="text" class="form-control" value="<?php echo htmlspecialchars($current_user['nis'] ?? ''); ?>" readonly>
+                                <label class="form-label">NISN</label>
+                                <input type="text" class="form-control" value="<?php echo htmlspecialchars($current_user['nisn'] ?? ''); ?>" readonly>
                             </div>
 
                             <div class="col-md-6 mb-3">

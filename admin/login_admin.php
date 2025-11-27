@@ -337,14 +337,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </button>
             </form>
             
-            <div class="divider">
-                <span>atau</span>
-            </div>
-            
-            <a href="<?= BASE_URL?>admin/login.php" class="link-siswa">
-                <i class="bi bi-arrow-left-circle"></i>
-                <span>Login sebagai Siswa</span>
-            </a>
         </div>
         
         <p class="footer-text">

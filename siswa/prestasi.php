@@ -8,6 +8,144 @@ requireRole(['siswa']);
 $page_title = 'Prestasi Saya';
 $current_user = getCurrentUser();
 
+// =========================================================
+// === PROSES TAMBAH PRESTASI (FIXED) ===
+// =========================================================
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['tambah_prestasi'])) {
+    $ekstrakurikuler_id = $_POST['ekstrakurikuler_id'];
+    $nama_prestasi = trim($_POST['nama_prestasi']);
+    $tingkat = $_POST['tingkat'];
+    $peringkat = trim($_POST['peringkat']);
+    $penyelenggara = trim($_POST['penyelenggara']);
+    $tanggal = $_POST['tanggal'];
+    $deskripsi = trim($_POST['deskripsi']);
+    
+    // Validasi: Cek apakah siswa terdaftar di eskul tersebut
+    $cek_anggota = query("
+        SELECT id FROM anggota_ekskul 
+        WHERE user_id = ? AND ekstrakurikuler_id = ? AND status = 'diterima'
+    ", [$current_user['id'], $ekstrakurikuler_id], 'ii');
+    
+    if (!$cek_anggota || $cek_anggota->num_rows == 0) {
+        setFlash('danger', 'Anda tidak terdaftar di ekstrakurikuler ini!');
+        redirect('siswa/prestasi.php');
+    }
+    
+    $anggota_id = $cek_anggota->fetch_assoc()['id'];
+    
+    // Upload sertifikat (opsional)
+    $sertifikat_path = null;
+    if (isset($_FILES['sertifikat']) && $_FILES['sertifikat']['error'] == 0) {
+        $allowed = ['pdf', 'jpg', 'jpeg', 'png'];
+        $filename = $_FILES['sertifikat']['name'];
+        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        
+        if (!in_array($ext, $allowed)) {
+            setFlash('danger', 'Format file harus PDF, JPG, JPEG, atau PNG');
+            redirect('siswa/prestasi.php');
+        }
+        
+        // Validasi ukuran (max 5MB)
+        if ($_FILES['sertifikat']['size'] > 5000000) {
+            setFlash('danger', 'Ukuran file maksimal 5MB');
+            redirect('siswa/prestasi.php');
+        }
+        
+        $newname = 'sertifikat_' . time() . '_' . uniqid() . '.' . $ext;
+        $upload_dir = '../assets/img/uploads/sertifikat/';
+        
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
+        }
+        
+        $upload_path = $upload_dir . $newname;
+        
+        if (move_uploaded_file($_FILES['sertifikat']['tmp_name'], $upload_path)) {
+            $sertifikat_path = 'assets/img/uploads/sertifikat/' . $newname;
+        } else {
+            setFlash('danger', 'Gagal mengupload file sertifikat.');
+            redirect('siswa/prestasi.php');
+        }
+    }
+    
+    // Baris 73
+    $check_columns = query("SHOW COLUMNS FROM prestasis");
+
+    // Baris 74-76: Cek apakah $check_columns adalah objek yang valid dan memiliki baris
+    $has_ekstrakurikuler_id = false;
+
+    // Perbaikan dilakukan di sini
+    if ($check_columns instanceof mysqli_result && $check_columns->num_rows > 0) {
+        while ($col = $check_columns->fetch_assoc()) {
+            if ($col['Field'] == 'ekstrakurikuler_id') {
+                $has_ekstrakurikuler_id = true;
+                break;
+            }
+        }
+    }
+    
+    if ($has_ekstrakurikuler_id) {
+        // Jika ada kolom ekstrakurikuler_id, insert dengan kolom tersebut
+        $result = query("
+            INSERT INTO prestasis (anggota_id, ekstrakurikuler_id, nama_prestasi, tingkat, peringkat, penyelenggara, tanggal, deskripsi, sertifikat) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ", [$anggota_id, $ekstrakurikuler_id, $nama_prestasi, $tingkat, $peringkat, $penyelenggara, $tanggal, $deskripsi, $sertifikat_path], 
+           'iisssssss');
+    } else {
+        // Jika tidak ada, insert tanpa ekstrakurikuler_id
+        $result = query("
+            INSERT INTO prestasis (anggota_id, nama_prestasi, tingkat, peringkat, penyelenggara, tanggal, deskripsi, sertifikat) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ", [$anggota_id, $nama_prestasi, $tingkat, $peringkat, $penyelenggara, $tanggal, $deskripsi, $sertifikat_path], 
+           'isssssss');
+    }
+    
+    if ($result['success']) {
+        setFlash('success', 'Prestasi berhasil ditambahkan!');
+    } else {
+        setFlash('danger', 'Gagal menambahkan prestasi: ' . ($result['error'] ?? 'Unknown error'));
+    }
+    
+    redirect('siswa/prestasi.php');
+}
+
+// =========================================================
+// === HAPUS PRESTASI ===
+// =========================================================
+if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id'])) {
+    $id = $_GET['id'];
+    
+    // Cek apakah prestasi ini milik user yang login
+    $cek = query("
+        SELECT p.sertifikat 
+        FROM prestasis p
+        JOIN anggota_ekskul ae ON p.anggota_id = ae.id
+        WHERE p.id = ? AND ae.user_id = ?
+    ", [$id, $current_user['id']], 'ii');
+    
+    if ($cek && $cek->num_rows > 0) {
+        $data = $cek->fetch_assoc();
+        
+        // Hapus file sertifikat jika ada
+        if ($data['sertifikat'] && file_exists('../' . $data['sertifikat'])) {
+            unlink('../' . $data['sertifikat']);
+        }
+        
+        // Hapus dari database
+        $result = query("DELETE FROM prestasis WHERE id = ?", [$id], 'i');
+        
+        if ($result['success']) {
+            setFlash('success', 'Prestasi berhasil dihapus.');
+        } else {
+            setFlash('danger', 'Gagal menghapus prestasi.');
+        }
+    } else {
+        setFlash('danger', 'Anda tidak memiliki izin untuk menghapus prestasi ini.');
+    }
+    
+    redirect('siswa/prestasi.php');
+}
+
 $tahun = $_GET['tahun'] ?? date('Y');
 $tingkat = $_GET['tingkat'] ?? '';
 
@@ -48,7 +186,26 @@ $stats = query("
     FROM prestasis p
     JOIN anggota_ekskul ae ON p.anggota_id = ae.id
     WHERE ae.user_id = ?
-", [$current_user['id']], 'i')->fetch_assoc();
+", [$current_user['id']], 'i');
+
+$stats = $stats && $stats->num_rows > 0 ? $stats->fetch_assoc() : [
+    'total' => 0,
+    'sekolah' => 0,
+    'kecamatan' => 0,
+    'kabupaten' => 0,
+    'provinsi' => 0,
+    'nasional' => 0,
+    'internasional' => 0
+];
+
+// List eskul untuk form tambah prestasi
+$eskul_for_prestasi = query("
+    SELECT DISTINCT e.id, e.nama_ekskul
+    FROM ekstrakurikulers e
+    JOIN anggota_ekskul ae ON e.id = ae.ekstrakurikuler_id
+    WHERE ae.user_id = ? AND ae.status = 'diterima'
+    ORDER BY e.nama_ekskul
+", [$current_user['id']], 'i');
 
 require_once '../includes/berry_siswa_head.php';
 require_once '../includes/berry_siswa_shell_open.php';
@@ -65,12 +222,25 @@ require_once '../includes/berry_siswa_shell_open.php';
 }
 </style>
 
+<?php
+$flash = getFlash();
+if ($flash):
+?>
+<div class="alert alert-<?php echo $flash['type']; ?> alert-dismissible fade show">
+    <?php echo $flash['message']; ?>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+<?php endif; ?>
+
 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
   <div>
     <span class="badge bg-light text-warning mb-2"><i class="bi bi-trophy"></i> Prestasi</span>
     <h3 class="fw-bold mb-1">Prestasi Saya</h3>
     <p class="text-muted mb-0">Catatan penghargaan dan pencapaian terbaik yang pernah diraih.</p>
   </div>
+  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahPrestasiModal">
+    <i class="bi bi-plus-circle"></i> Tambah Prestasi
+  </button>
 </div>
 
 <div class="card border-0 shadow-sm mb-4">
@@ -182,7 +352,15 @@ require_once '../includes/berry_siswa_shell_open.php';
               <span class="badge bg-<?php echo $badge_tingkat[$p['tingkat']]; ?> px-3 py-2 text-uppercase">
                 <?php echo htmlspecialchars($p['tingkat']); ?>
               </span>
-              <span class="badge bg-light text-dark"><?php echo formatTanggal($p['tanggal']); ?></span>
+              <div>
+                <span class="badge bg-light text-dark me-1"><?php echo formatTanggal($p['tanggal']); ?></span>
+                <a href="?action=delete&id=<?php echo $p['id']; ?>" 
+                   class="btn btn-sm btn-danger" 
+                   onclick="return confirm('Yakin ingin menghapus prestasi ini?')"
+                   title="Hapus Prestasi">
+                  <i class="bi bi-trash"></i>
+                </a>
+              </div>
             </div>
             <h5 class="text-primary mb-2"><?php echo htmlspecialchars($p['nama_prestasi'] ?? ''); ?></h5>
             <p class="mb-2">
@@ -210,7 +388,10 @@ require_once '../includes/berry_siswa_shell_open.php';
     <div class="card-body text-center py-5">
       <i class="bi bi-trophy text-muted" style="font-size:4rem;opacity:.2;"></i>
       <h5 class="mt-3 text-muted">Belum ada prestasi tercatat</h5>
-      <p class="text-muted mb-0">Terus berlatih dan raih prestasi terbaikmu!</p>
+      <p class="text-muted mb-3">Terus berlatih dan raih prestasi terbaikmu!</p>
+      <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#tambahPrestasiModal">
+        <i class="bi bi-plus-circle"></i> Tambah Prestasi Pertama
+      </button>
     </div>
   </div>
 <?php endif; ?>
@@ -219,7 +400,97 @@ require_once '../includes/berry_siswa_shell_open.php';
   <i class="bi bi-lightbulb"></i> Simpan sertifikat dan bukti prestasi Anda dengan baik—akan sangat berguna untuk portofolio akademik.
 </div>
 
+<!-- Modal Tambah Prestasi -->
+<div class="modal fade" id="tambahPrestasiModal" tabindex="-1" aria-labelledby="tambahPrestasiModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="POST" action="" enctype="multipart/form-data">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title text-white" id="tambahPrestasiModalLabel">
+                        <i class="bi bi-trophy"></i> Tambah Prestasi Baru
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="tambah_prestasi" value="1">
+                    
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> 
+                        <strong>Info:</strong> Tambahkan prestasi yang Anda raih dalam kegiatan ekstrakurikuler.
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="ekstrakurikuler_id" class="form-label">Ekstrakurikuler <span class="text-danger">*</span></label>
+                            <select name="ekstrakurikuler_id" id="ekstrakurikuler_id" class="form-select" required>
+                                <option value="">-- Pilih Ekstrakurikuler --</option>
+                                <?php while ($e = $eskul_for_prestasi->fetch_assoc()): ?>
+                                <option value="<?php echo $e['id']; ?>">
+                                    <?php echo htmlspecialchars($e['nama_ekskul']); ?>
+                                </option>
+                                <?php endwhile; ?>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-12 mb-3">
+                            <label for="nama_prestasi" class="form-label">Nama Prestasi <span class="text-danger">*</span></label>
+                            <input type="text" name="nama_prestasi" id="nama_prestasi" class="form-control" 
+                                   placeholder="Contoh: Juara 1 Lomba Basket Antar Sekolah" required maxlength="200">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="tingkat" class="form-label">Tingkat <span class="text-danger">*</span></label>
+                            <select name="tingkat" id="tingkat" class="form-select" required>
+                                <option value="">-- Pilih Tingkat --</option>
+                                <option value="sekolah">Sekolah</option>
+                                <option value="kecamatan">Kecamatan</option>
+                                <option value="kabupaten">Kabupaten</option>
+                                <option value="provinsi">Provinsi</option>
+                                <option value="nasional">Nasional</option>
+                                <option value="internasional">Internasional</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="peringkat" class="form-label">Peringkat <span class="text-danger">*</span></label>
+                            <input type="text" name="peringkat" id="peringkat" class="form-control" 
+                                   placeholder="Contoh: Juara 1, Juara 2, Peserta" required maxlength="50">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="penyelenggara" class="form-label">Penyelenggara <span class="text-danger">*</span></label>
+                            <input type="text" name="penyelenggara" id="penyelenggara" class="form-control" 
+                                   placeholder="Contoh: Dinas Pendidikan Kab. Lebak" required maxlength="100">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="tanggal" class="form-label">Tanggal <span class="text-danger">*</span></label>
+                            <input type="date" name="tanggal" id="tanggal" class="form-control" required>
+                        </div>
+                        
+                        <div class="col-md-12 mb-3">
+                            <label for="deskripsi" class="form-label">Deskripsi</label>
+                            <textarea name="deskripsi" id="deskripsi" class="form-control" rows="3" 
+                                      placeholder="Tambahkan deskripsi singkat tentang prestasi (opsional)"></textarea>
+                        </div>
+                        
+                        <div class="col-md-12 mb-3">
+                            <label for="sertifikat" class="form-label">Upload Sertifikat (Opsional)</label>
+                            <input type="file" name="sertifikat" id="sertifikat" class="form-control" 
+                                   accept=".pdf,.jpg,.jpeg,.png">
+                            <small class="text-muted">Format: PDF, JPG, JPEG, PNG. Maksimal 5MB</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Simpan Prestasi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <?php require_once '../includes/berry_siswa_shell_close.php'; ?>
-
-
-

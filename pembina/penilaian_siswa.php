@@ -25,9 +25,7 @@ if (!$pembina_id) {
     exit();
 }
 
-// ==========================
 //  SIMPAN NILAI (POST)
-// ==========================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_nilai'])) {
     $anggota_id = (int)($_POST['anggota_id'] ?? 0);
     $nilai = $_POST['nilai'] ?? '';
@@ -83,9 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['simpan_nilai'])) {
     exit();
 }
 
-// ==========================
 //  AMBIL DATA ANGGOTA HANYA EKSUL PEMBINA
-// ==========================
 $anggota = query("
     SELECT 
         ae.*,
@@ -102,18 +98,14 @@ $anggota = query("
     ORDER BY e.nama_ekskul, u.name
 ", [$pembina_id], 'i');
 
-// ==========================
 //  LIST ESKUL KHUSUS PEMBINA (filter dropdown)
-// ==========================
 $eskul_list = query("
     SELECT id, nama_ekskul FROM ekstrakurikulers
     WHERE status = 'aktif' AND pembina_id = ?
     ORDER BY nama_ekskul
 ", [$pembina_id], 'i');
 
-// ==========================
 //  HITUNG BELUM DINILAI (opsional)
-// ==========================
 $belum_dinilai_q = query("
     SELECT COUNT(*) AS total
     FROM anggota_ekskul ae

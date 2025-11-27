@@ -32,8 +32,8 @@
                 <h5 class="text-white font-extrabold mb-3">Kontak</h5>
                 <ul class="space-y-2">
                     <li class="flex items-start gap-2"><i class="bi bi-geo-alt-fill"></i><span>Jl. Raya Rangkasbitung, Lebak, Banten</span></li>
-                    <li class="flex items-start gap-2"><i class="bi bi-telephone-fill"></i><span>(0252) 123456</span></li>
-                    <li class="flex items-start gap-2"><i class="bi bi-envelope-fill"></i><span>info@mtsn1lebak.sch.id</span></li>
+                    <li class="flex items-start gap-2"><i class="bi bi-telephone-fill"></i><span>(0252) 123 ----</span></li>
+                    <li class="flex items-start gap-2"><i class="bi bi-envelope-fill"></i><span>demo@mtsn1lebak.sch.id</span></li>
                     <li class="flex items-start gap-2"><i class="bi bi-clock-fill"></i><span>Senin - Jumat: 07:00 - 15:00</span></li>
                 </ul>
             </div>

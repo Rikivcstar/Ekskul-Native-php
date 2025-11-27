@@ -104,7 +104,7 @@ require_once '../includes/berry_siswa_shell_open.php';
           <span class="badge bg-light text-success mb-2">Selamat datang kembali</span>
           <h3 class="fw-bold text-dark mb-2">Halo, <?php echo htmlspecialchars($current_user['name']); ?> 👋</h3>
           <p class="text-muted mb-0">
-            <i class="bi bi-person-badge"></i> NIS: <?php echo htmlspecialchars($current_user['nis']); ?> &nbsp; • &nbsp;
+            <i class="bi bi-person-badge"></i> NISN: <?php echo htmlspecialchars($current_user['nisn']); ?> &nbsp; • &nbsp;
             <i class="bi bi-book"></i> Kelas: <?php echo htmlspecialchars($current_user['kelas']); ?>
           </p>
         </div>
@@ -194,7 +194,7 @@ require_once '../includes/berry_siswa_shell_open.php';
   <?php
   $quick_links = [
     ['title' => 'Jadwal Kegiatan', 'icon' => 'bi bi-calendar-week', 'url' => BASE_URL . 'siswa/jadwal.php', 'bg' => 'linear-gradient(135deg,#0ea5e9,#2563eb)', 'desc' => 'Lihat jadwal eskul'],
-    ['title' => 'Presensi', 'icon' => 'bi bi-clipboard-check', 'url' => BASE_URL . 'siswa/presensi.php', 'bg' => 'linear-gradient(135deg,#14b8a6,#0d9488)', 'desc' => 'Riwayat presensi'],
+    ['title' => 'Presensi', 'icon' => 'bi bi-clipboard-check', 'url' => BASE_URL . 'siswa/presensi/index.php', 'bg' => 'linear-gradient(135deg,#14b8a6,#0d9488)', 'desc' => 'Riwayat presensi'],
     ['title' => 'Sertifikat', 'icon' => 'bi bi-award', 'url' => BASE_URL . 'siswa/sertifikat.php', 'bg' => 'linear-gradient(135deg,#a855f7,#7c3aed)', 'desc' => 'Cetak sertifikat'],
     ['title' => 'Galeri', 'icon' => 'bi bi-images', 'url' => BASE_URL . 'siswa/galeri.php', 'bg' => 'linear-gradient(135deg,#f97316,#ea580c)', 'desc' => 'Dokumentasi kegiatan'],
   ];

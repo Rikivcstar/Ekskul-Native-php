@@ -11,13 +11,13 @@ $print_mode = false;
 $sertifikat = null;
 
 // Cek sertifikat berdasarkan NIS atau ID
-if (isset($_POST['nis']) || isset($_GET['nis']) || isset($_GET['id'])) {
-    $nis = $_POST['nis'] ?? $_GET['nis'] ?? null;
+if (isset($_POST['nisn']) || isset($_GET['nisn']) || isset($_GET['id'])) {
+    $nisn = $_POST['nisn'] ?? $_GET['nisn'] ?? null;
     $anggota_id = $_GET['id'] ?? null;
     
     if ($anggota_id) {
         $result = query("
-            SELECT u.nis, u.name, u.kelas, e.nama_ekskul, pembina.name as nama_pembina, 
+            SELECT u.nisn, u.name, u.kelas, e.nama_ekskul, pembina.name as nama_pembina, 
                    sert.nomor_sertifikat, sert.tanggal_terbit, sert.keterangan,
                    ae.nilai, ae.tanggal_penilaian, ae.catatan_pembina, ae.tanggal_daftar
             FROM anggota_ekskul ae
@@ -30,7 +30,7 @@ if (isset($_POST['nis']) || isset($_GET['nis']) || isset($_GET['id'])) {
         ", [$anggota_id], 'i');
     } else {
         $result = query("
-            SELECT u.nis, u.name, u.kelas, e.nama_ekskul, pembina.name as nama_pembina, 
+            SELECT u.nisn, u.name, u.kelas, e.nama_ekskul, pembina.name as nama_pembina, 
                    sert.nomor_sertifikat, sert.tanggal_terbit, sert.keterangan,
                    ae.nilai, ae.tanggal_penilaian, ae.catatan_pembina, ae.tanggal_daftar, ae.id as anggota_id
             FROM users u
@@ -38,10 +38,10 @@ if (isset($_POST['nis']) || isset($_GET['nis']) || isset($_GET['id'])) {
             JOIN ekstrakurikulers e ON ae.ekstrakurikuler_id = e.id
             LEFT JOIN users pembina ON e.pembina_id = pembina.id
             LEFT JOIN sertifikats sert ON ae.id = sert.anggota_id
-            WHERE u.nis = ? AND ae.status = 'diterima' AND u.role = 'siswa'
+            WHERE u.nisn = ? AND ae.status = 'diterima' AND u.role = 'siswa'
             ORDER BY sert.tanggal_terbit DESC
             LIMIT 1
-        ", [$nis], 's');
+        ", [$nisn], 's');
     }
     
     if ($result && $result->num_rows > 0) {
@@ -100,13 +100,13 @@ $tahun_kurikulum = date('Y') . '/' . (date('Y') + 1);
             <div class="p-6">
                 <div class="mb-4 rounded-xl bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200 px-4 py-3 flex items-start gap-2">
                     <i class="bi bi-info-circle mt-0.5"></i>
-                    <span>Masukkan NIS Anda untuk mengecek dan mencetak sertifikat.</span>
+                    <span>Masukkan NISN Anda untuk mengecek dan mencetak sertifikat.</span>
                 </div>
 
                 <form method="POST" action="" class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-slate-700">NIS (Nomor Induk Siswa)</label>
-                        <input type="text" name="nis" placeholder="Masukkan NIS Anda" required autofocus
+                        <label class="block text-sm font-medium text-slate-700">NISN (Nomor Induk Siswa Nasional)</label>
+                        <input type="text" name="nisn" placeholder="Masukkan NISN Anda" required autofocus
                                class="mt-1 w-full rounded-xl border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 px-4 py-3" />
                     </div>
 
@@ -122,7 +122,7 @@ $tahun_kurikulum = date('Y') . '/' . (date('Y') + 1);
                     </div>
                 </form>
 
-                <?php if (isset($_POST['nis']) && !$sertifikat): ?>
+                <?php if (isset($_POST['nisn']) && !$sertifikat): ?>
                 <div class="mt-5 rounded-xl bg-amber-50 text-amber-800 ring-1 ring-amber-200 px-4 py-3 flex items-start gap-2">
                     <i class="bi bi-exclamation-triangle mt-0.5"></i>
                     <span>Sertifikat tidak ditemukan. Pastikan Anda sudah terdaftar dan aktif di ekstrakurikuler.</span>
@@ -135,7 +135,7 @@ $tahun_kurikulum = date('Y') . '/' . (date('Y') + 1);
                     <h5 class="font-bold text-emerald-800 flex items-center gap-2"><i class="bi bi-check-circle"></i> Sertifikat Ditemukan!</h5>
                     <div class="my-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
                         <div class="flex justify-between sm:block"><span class="text-slate-500">Nama</span><span class="font-semibold text-slate-800"><?php echo $sertifikat['name']; ?></span></div>
-                        <div class="flex justify-between sm:block"><span class="text-slate-500">NIS</span><span class="font-semibold text-slate-800"><?php echo $sertifikat['nis']; ?></span></div>
+                        <div class="flex justify-between sm:block"><span class="text-slate-500">NISN</span><span class="font-semibold text-slate-800"><?php echo $sertifikat['nisn']; ?></span></div>
                         <div class="flex justify-between sm:block"><span class="text-slate-500">Kelas</span><span class="font-semibold text-slate-800"><?php echo $sertifikat['kelas']; ?></span></div>
                         <div class="flex justify-between sm:block"><span class="text-slate-500">Ekstrakurikuler</span><span class="font-semibold text-slate-800"><?php echo $sertifikat['nama_ekskul']; ?></span></div>
                         <?php if ($sertifikat['nilai']): ?>
@@ -153,7 +153,7 @@ $tahun_kurikulum = date('Y') . '/' . (date('Y') + 1);
                         <div class="flex justify-between sm:block"><span class="text-slate-500">Tanggal Terbit</span><span class="font-semibold text-slate-800"><?php echo formatTanggal($sertifikat['tanggal_terbit']); ?></span></div>
                     </div>
                     <div class="mt-3">
-                        <a href="?nis=<?php echo $sertifikat['nis']; ?>&print=1" target="_blank" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 shadow">
+                        <a href="?nisn=<?php echo $sertifikat['nisn']; ?>&print=1" target="_blank" class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 shadow">
                             <i class="bi bi-printer"></i>
                             Cetak Sertifikat
                         </a>
@@ -578,7 +578,7 @@ require_once 'includes/footer.php';
             <div class="student-name"><?php echo strtoupper($sertifikat['name']); ?></div>
             
             <div class="student-details">
-                <span><strong>NIS:</strong> <?php echo $sertifikat['nis']; ?></span>
+                <span><strong>NISN:</strong> <?php echo $sertifikat['nisn']; ?></span>
                 <span><strong>Kelas:</strong> <?php echo $sertifikat['kelas']; ?></span>
             </div>
             

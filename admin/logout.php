@@ -8,6 +8,6 @@ session_unset();
 session_destroy();
 
 // Redirect ke login dengan pesan
-header("Location: " . BASE_URL . "admin/login.php");
+header("Location: " . BASE_URL . "admin/login_admin.php");
 exit;
 ?>

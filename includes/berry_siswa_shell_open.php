@@ -62,6 +62,12 @@ $menu_items = [
           </a>
         </li>
         <li class="pc-item">
+          <a class="pc-link" href="<?php echo BASE_URL; ?>siswa/logout.php">
+            <span class="pc-micon"><i class="ti ti-logout me-2"></i></span>
+            <span class="pc-mtext">Logout</span>
+          </a>   
+        </li>
+        <li class="pc-item">
           <a href="<?php echo BASE_URL; ?>" class="pc-link" target="_blank">
             <span class="pc-micon"><i class="ti ti-external-link"></i></span>
             <span class="pc-mtext">Beranda Website</span>
@@ -84,7 +90,7 @@ $menu_items = [
     <div class="ms-auto d-flex align-items-center gap-3">
       <div class="text-end">
         <div class="fw-semibold text-dark"><?php echo htmlspecialchars($current_user['name']); ?></div>
-        <small class="text-muted">NIS: <?php echo htmlspecialchars($current_user['nis']); ?></small>
+        <small class="text-muted">NISN: <?php echo htmlspecialchars($current_user['nisn']); ?></small>
       </div>
       <div class="dropdown">
         <a href="#" class="avatar border dropdown-toggle" data-bs-toggle="dropdown">

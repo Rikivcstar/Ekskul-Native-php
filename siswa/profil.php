@@ -174,7 +174,7 @@ require_once '../includes/berry_siswa_shell_open.php';
         </button>
         <hr>
         <div class="text-start small">
-          <p class="mb-2"><i class="bi bi-person-badge text-primary"></i> <strong>NIS:</strong> <?php echo htmlspecialchars($current_user['nis']); ?></p>
+          <p class="mb-2"><i class="bi bi-person-badge text-primary"></i> <strong>NISN:</strong> <?php echo htmlspecialchars($current_user['nisn']); ?></p>
           <p class="mb-2"><i class="bi bi-envelope text-primary"></i> <strong>Email:</strong> <?php echo htmlspecialchars($current_user['email']); ?></p>
           <p class="mb-2"><i class="bi bi-telephone text-primary"></i> <strong>Telepon:</strong> <?php echo $current_user['no_hp'] ?: '-'; ?></p>
           <p class="mb-2"><i class="bi bi-book text-primary"></i> <strong>Kelas:</strong> <?php echo $current_user['kelas'] ?: '-'; ?></p>
@@ -185,7 +185,7 @@ require_once '../includes/berry_siswa_shell_open.php';
 
     <div class="card border-0 shadow-sm mt-3">
       <div class="card-header bg-primary text-white">
-        <h6 class="mb-0"><i class="bi bi-graph-up"></i> Statistik</h6>
+        <h6 class="mb-0 text-white"><i class="bi bi-graph-up"></i> Statistik</h6>
       </div>
       <div class="card-body">
         <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
@@ -206,7 +206,7 @@ require_once '../includes/berry_siswa_shell_open.php';
     <?php if (!empty($eskul_items)): ?>
     <div class="card border-0 shadow-sm mt-3">
       <div class="card-header bg-success text-white">
-        <h6 class="mb-0"><i class="bi bi-credit-card-2-front"></i> Kartu Anggota</h6>
+        <h6 class="mb-0 text-white" ><i class="bi bi-credit-card-2-front"></i> Kartu Anggota</h6>
       </div>
       <div class="card-body">
         <p class="small text-muted mb-3"><i class="bi bi-info-circle"></i> Cetak kartu anggota untuk setiap ekstrakurikuler.</p>
@@ -240,8 +240,8 @@ require_once '../includes/berry_siswa_shell_open.php';
               <input type="email" name="email" class="form-control" value="<?php echo htmlspecialchars($current_user['email']); ?>" required>
             </div>
             <div class="col-md-6 mb-3">
-              <label class="form-label">NIS</label>
-              <input type="text" class="form-control" value="<?php echo htmlspecialchars($current_user['nis']); ?>" disabled>
+              <label class="form-label">NISN</label>
+              <input type="text" class="form-control" value="<?php echo htmlspecialchars($current_user['nisn']); ?>" disabled>
             </div>
             <div class="col-md-6 mb-3">
               <label class="form-label">Kelas</label>

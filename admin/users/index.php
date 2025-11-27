@@ -174,7 +174,7 @@ $belum_dinilai = query("SELECT COUNT(*) as total FROM anggota_ekskul WHERE statu
                         <tr>
                             <th width="5%">No</th>
                             <th width="20%">Nama</th>
-                            <th width="20%">Email/NIS</th>
+                            <th width="20%">Email/NISN</th>
                             <th width="10%">Role</th>
                             <th width="10%">Kelas</th>
                             <th width="10%">Status</th>
@@ -201,7 +201,7 @@ $belum_dinilai = query("SELECT COUNT(*) as total FROM anggota_ekskul WHERE statu
                                     <span><?php echo htmlspecialchars($row['name']); ?></span>
                                 </div>
                             </td>
-                            <td><?php echo htmlspecialchars($row['email'] ?? $row['nis']); ?></td>
+                            <td><?php echo htmlspecialchars($row['email'] ?? $row['nisn']); ?></td>
                             <td>
                                 <span class="badge bg-<?php echo $row['role'] == 'admin' ? 'danger' : ($row['role'] == 'pembina' ? 'primary' : 'info'); ?>"><?php echo ucfirst($row['role']); ?></span>
                             </td>

@@ -8,9 +8,6 @@ requireRole(['admin']);
 $page_title = 'Kelola Anggota';
 $current_user = getCurrentUser();
 
-// =========================================================
-// === PROSES CRUD: APPROVE / REJECT / DELETE / UPDATE ===
-// =========================================================
 
 if (isset($_GET['action']) && isset($_GET['id'])) {
     $action = $_GET['action'];
@@ -72,7 +69,7 @@ if ($current_user['role'] == 'pembina') {
 // Ambil data anggota
 // Tambahkan kolom 'nilai' untuk ditampilkan/diedit
 $anggota = query("
-    SELECT ae.*, u.name, u.nis, u.kelas, u.jenis_kelamin, u.no_hp, e.nama_ekskul, e.pembina_id
+    SELECT ae.*, u.name, u.nisn, u.kelas, u.jenis_kelamin, u.no_hp, e.nama_ekskul, e.pembina_id
     FROM anggota_ekskul ae
     JOIN users u ON ae.user_id = u.id
     JOIN ekstrakurikulers e ON ae.ekstrakurikuler_id = e.id
@@ -138,7 +135,7 @@ $belum_dinilai = query("SELECT COUNT(*) as total FROM anggota_ekskul WHERE statu
                             <thead class="table-warning">
                                 <tr>
                                     <th>No</th>
-                                    <th>NIS</th>
+                                    <th>NISN</th>
                                     <th>Nama</th>
                                     <th>Kelas</th>
                                     <th>Eskul</th>
@@ -157,7 +154,7 @@ $belum_dinilai = query("SELECT COUNT(*) as total FROM anggota_ekskul WHERE statu
                                 ?>
                                 <tr>
                                     <td><?php echo $no++; ?></td>
-                                    <td><?php echo $row['nis']; ?></td>
+                                    <td><?php echo $row['nisn']; ?></td>
                                     <td><?php echo $row['name']; ?></td>
                                     <td><?php echo $row['kelas']; ?></td>
                                     <td><?php echo $row['nama_ekskul']; ?></td>
@@ -196,7 +193,7 @@ $belum_dinilai = query("SELECT COUNT(*) as total FROM anggota_ekskul WHERE statu
                             <thead class="table-success">
                                 <tr>
                                     <th>No</th>
-                                    <th>NIS</th>
+                                    <th>NISN</th>
                                     <th>Nama</th>
                                     <th>Kelas</th>
                                     <th>Eskul</th>
@@ -214,7 +211,7 @@ $belum_dinilai = query("SELECT COUNT(*) as total FROM anggota_ekskul WHERE statu
                                 ?>
                                 <tr>
                                     <td><?php echo $no_diterima++; ?></td>
-                                    <td><?php echo $row['nis']; ?></td>
+                                    <td><?php echo $row['nisn']; ?></td>
                                     <td><?php echo $row['name']; ?></td>
                                     <td><?php echo $row['kelas']; ?></td>
                                     <td><?php echo $row['nama_ekskul']; ?></td>
@@ -272,7 +269,7 @@ $belum_dinilai = query("SELECT COUNT(*) as total FROM anggota_ekskul WHERE statu
                             <thead class="table-danger">
                                 <tr>
                                     <th>No</th>
-                                    <th>NIS</th>
+                                    <th>NISN</th>
                                     <th>Nama</th>
                                     <th>Kelas</th>
                                     <th>Eskul</th>
@@ -291,7 +288,7 @@ $belum_dinilai = query("SELECT COUNT(*) as total FROM anggota_ekskul WHERE statu
                                 ?>
                                 <tr>
                                     <td><?php echo $no++; ?></td>
-                                    <td><?php echo $row['nis']; ?></td>
+                                    <td><?php echo $row['nisn']; ?></td>
                                     <td><?php echo $row['name']; ?></td>
                                     <td><?php echo $row['kelas']; ?></td>
                                     <td><?php echo $row['nama_ekskul']; ?></td>

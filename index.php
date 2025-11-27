@@ -17,7 +17,7 @@ $eskul_populer = query("
     WHERE e.status = 'aktif'
     GROUP BY e.id
     ORDER BY jumlah_anggota DESC
-    LIMIT 6
+    LIMIT 9
 ");
 
 // Berita terbaru
@@ -34,7 +34,7 @@ $berita_terbaru = query("
 $prestasi_terbaru = query("
     SELECT p.*, e.nama_ekskul, u.name as nama_siswa
     FROM prestasis p
-    JOIN ekstrakurikulers e ON p.ekstrakurikuler_id = e.id
+    LEFT JOIN ekstrakurikulers e ON p.ekstrakurikuler_id = e.id
     LEFT JOIN anggota_ekskul ae ON p.anggota_id = ae.id
     LEFT JOIN users u ON ae.user_id = u.id
     ORDER BY p.tanggal DESC

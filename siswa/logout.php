@@ -22,6 +22,6 @@ if ($flash_message) {
 }
 
 // Redirect ke halaman login siswa
-header("Location: " . BASE_URL . "admin/login.php");
+header("Location: " . BASE_URL . "login.php");
 exit;
 ?>

@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($action == 'update_profil') {
         $name = trim($_POST['name']);
         $email = $_POST['email'] ?? NULL;
-        $nis = $_POST['nis'] ?? NULL;
+        $nisn = $_POST['nisn'] ?? NULL;
         $kelas = $_POST['kelas'] ?? NULL;
         $jenis_kelamin = $_POST['jenis_kelamin'] ?? NULL;
         $no_hp = $_POST['no_hp'] ?? NULL;
@@ -34,9 +34,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         $result = query("
             UPDATE users 
-            SET name = ?, email = ?, nis = ?, kelas = ?, jenis_kelamin = ?, no_hp = ?, alamat = ?, is_active = ?
+            SET name = ?, email = ?, nisn = ?, kelas = ?, jenis_kelamin = ?, no_hp = ?, alamat = ?, is_active = ?
             WHERE id = ?
-        ", [$name, $email, $nis, $kelas, $jenis_kelamin, $no_hp, $alamat, $is_active, $id], 'sssssssii');
+        ", [$name, $email, $nisn, $kelas, $jenis_kelamin, $no_hp, $alamat, $is_active, $id], 'sssssssii');
         
         if ($result['success']) {
             setFlash('success', 'Profil user berhasil diupdate!');
@@ -187,13 +187,13 @@ if ($data['role'] == 'siswa') {
                     
                     <div class="text-start">
                         <?php if ($data['role'] == 'siswa'): ?>
-                        <p class="mb-2"><i class="bi bi-person-badge text-success"></i> <strong>NIS:</strong> <?php echo $data['nis']; ?></p>
-                        <p class="mb-2"><i class="bi bi-book text-success"></i> <strong>Kelas:</strong> <?php echo $data['kelas'] ?: '-'; ?></p>
+                        <p class="mb-2"><i class="bi bi-person-badge text-success"></i> <strong>NISN :</strong> <?php echo $data['nisn']; ?></p>
+                        <p class="mb-2"><i class="bi bi-book text-success"></i> <strong>Kelas :</strong> <?php echo $data['kelas'] ?: '-'; ?></p>
                         <?php else: ?>
-                        <p class="mb-2"><i class="bi bi-envelope text-success"></i> <strong>Email:</strong> <?php echo $data['email']; ?></p>
+                        <p class="mb-2"><i class="bi bi-envelope text-success"></i> <strong>Email :</strong> <?php echo $data['email']; ?></p>
                         <?php endif; ?>
-                        <p class="mb-2"><i class="bi bi-telephone text-success"></i> <strong>Telepon:</strong> <?php echo $data['no_hp'] ?: '-'; ?></p>
-                        <p class="mb-0"><i class="bi bi-calendar text-success"></i> <strong>Terdaftar:</strong> <?php echo date('d M Y', strtotime($data['created_at'])); ?></p>
+                        <p class="mb-2"><i class="bi bi-telephone text-success"></i> <strong>Telepon :</strong> <?php echo $data['no_hp'] ?: '-'; ?></p>
+                        <p class="mb-0"><i class="bi bi-calendar text-success"></i> <strong>Terdaftar :</strong> <?php echo date('d M Y', strtotime($data['created_at'])); ?></p>
                     </div>
                 </div>
             </div>
@@ -257,9 +257,9 @@ if ($data['role'] == 'siswa') {
 
                             <?php if ($data['role'] == 'siswa'): ?>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">NIS</label>
-                                <input type="text" name="nis" class="form-control" 
-                                       value="<?php echo $data['nis']; ?>">
+                                <label class="form-label">NISN</label>
+                                <input type="text" name="nisn" class="form-control" 
+                                       value="<?php echo $data['nisn']; ?>">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Kelas</label>
